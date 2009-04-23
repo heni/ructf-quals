@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<?xml-stylesheet type="text/xsl" href="qserver.xsl" ?>
+<response base="http://quals2009.ructf.org:62675">
+    <view type="news">
+        <news time="Fri Feb 27 15:50:00 2009" author="admin">
+            <div class="news">И новости тоже работают!!!!</div>
+        </news>
+        <news time="Fri Feb 27 15:40:00 2009" author="admin">
+            <div class="news">Уф... Сервер начал свою работу!!!!</div>
+        </news>
+    </view>
+</response>
