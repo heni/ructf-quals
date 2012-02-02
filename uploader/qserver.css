@@ -1,0 +1,50 @@
+html, body {color: lightgreen; background-color: black; font-family: monospace; height: 100%; text-align: center}
+div.page-header {font-size: 4em; margin: 0px auto 20px ; text-align: center}
+div.page-header a {text-decoration: none}
+
+a {color: lightgreen}
+
+.button {border: 1px solid green; background-color: transparent; color: green}
+.button:hover {border-left-style: inset; border-top-style: inset; border-right-style: outset; border-bottom-style: outset}
+
+.error {color: #ff8800} 
+
+.height-20p {margin: 0 0 10%}
+.height-1em {min-height: 1em; height: 1em}
+
+.trail {text-align: right; margin: 0 0 -1em 0; height: 1em;}
+.header {text-align: center; font-weight: bold; font-size: 2em}
+
+table.quest-selector {border-collapse: collapse; border: 1px dashed green; width: 80%; margin: 10px auto;}
+table.quest-selector td {width:12.5%; margin: 0; padding: 10px; vertical-align: top}
+table.quest-selector td ul {margin: 0px; padding: 10px 0; list-style: none; text-align: center; width:100%;}
+table.quest-selector td ul li {margin:10px 0px}
+table.quest-selector td ul li.available {color: green; border: 1px dashed green; cursor: pointer}
+table.quest-selector td ul li.unavailable {color: gray; border: 1px dashed gray}
+table.quest-selector td ul li.completed {color: green; border: 1px solid green}
+
+table.quest-monitor {border-collapse: collapse; border: 1px dashed green; width: 80%; margin: 10px 0 0 0; float: left;}
+table.quest-monitor td {width:12.5%; margin: 0; padding: 10px; vertical-align: top}
+table.quest-monitor td ul {margin: 0px; padding: 10px 0; list-style: none; text-align: center; width:100%;}
+table.quest-monitor td ul li {margin:10px 0px}
+table.quest-monitor td ul li.available {color: green; border: 1px dashed green}
+table.quest-monitor td ul li.unavailable {color: gray; border: 1px dashed gray}
+table.quest-monitor td ul li.completed {color: green; border: 1px solid green}
+
+table.ranklist {float: right}
+table.ranklist th {padding-left: 0.3em; color: green}
+table.ranklist td {padding-left: 0.3em}
+
+form#login-form {width: 40%; margin: 0 0 0 30%;}
+
+form#login-form label {font-weight: bold; margin: 5px 0px 5px 5px}
+form#login-form input.password {margin: 5px 0px 5px 5px; border: 1px dashed green; background-color: transparent; }
+
+div.page-inform {width: 40%; margin: 5% 0 0 30%; border: 3px double white; padding: 5px}
+div.page-wrapper {min-height: 100%; height: auto !important; height: 100%; margin: 0 auto -3em;}
+div.page-pusher {height: 3.5em; min-height: 3.5em;}
+div.page-footer {height: 2em; font-weight: bold; color: lightgray; text-align: center; }
+
+div.hidden {display: none}
+
+div#show-quest-block {border: double 4px green; position: absolute; left: 25%; right: 25%; width: 50%;}
