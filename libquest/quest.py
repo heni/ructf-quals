@@ -1,10 +1,17 @@
-#!/usr/bin/env python2.5
-
+#!/usr/bin/env python2.6
 from xml.dom import minidom
-import cgi, logging, os
+import cgi, logging, os, cStringIO, time
 factory = minidom.Document()
 
-class QuestDescriptor:
+from common import *
+
+class QuestDescriptor(Unpickable(questID=str,
+                xmlNode=default,
+                text=SmartDecoder.decode,
+                html=str,
+                file=str,
+                waitingTime=default)):
+                        
     @staticmethod
     def decode(text):
         if not isinstance(text, unicode):
@@ -12,10 +19,22 @@ class QuestDescriptor:
             text = unicode(text, "utf-8")
         return text
 
-    def __init__(self, questID, text = None, html = None, file = None):
+    @classmethod
+    def create(cls, o):
+        if isinstance(o, cls):
+            return o
+        raise RuntimeError("can't copy non QuestDescriptor object")
+
+    def __init__(self, questID, text = None, html = None, file = None, timeout = None):
+        super(QuestDescriptor, self).__init__()
         self.questID = questID
         self.xmlNode = factory.createElement("quest")
         self.xmlNode.setAttribute("id", str(questID))
+        if isinstance(timeout, (str, unicode)):
+            timeout = int(timeout.strip())
+        if timeout:
+            self.waitingTime = int(time.time() + timeout)
+            self.xmlNode.setAttribute("waitingTime", time.ctime(self.waitingTime))
         view = None
         if html:
             try:
@@ -23,6 +42,7 @@ class QuestDescriptor:
                 view.setAttribute("mode", "html")
                 view.appendChild(minidom.parseString(html).documentElement)
             except:
+                logging.exception("can't parse html object: %s", html)
                 view = None
         if view is None and text:
             text = self.decode(text)
@@ -44,6 +64,19 @@ class QuestDescriptor:
     def GetXMLCode(self):
         return self.xmlNode.toxml()
 
+    def GetTextPresentation(self):
+        buffer = cStringIO.StringIO()
+        print >>buffer, "ID: %s" % self.questID
+        if self.text:
+            print >>buffer, "text: %s" % self.text
+        if self.html:
+            print >>buffer, "html: %s" % self.html
+        if self.file:
+            print >>buffer, "file: %s" % self.file
+        if self.waitingTime:
+            print >>buffer, "timeout: %s" % int(self.waitingTime - time.time())
+        return buffer.getvalue()
+
     def GetXMLNode(self):
         return self.xmlNode
 
@@ -52,7 +85,7 @@ class QuestDescriptor:
 
     @classmethod
     def FromTextMessage(self, message):
-        quest = {'questID': None, 'text': None, 'html': None, 'file': None}
+        quest = {'questID': None, 'text': None, 'html': None, 'file': None, 'timeout': None}
         cur = None
         for line in message.split("\n"):
             if line.startswith('ID:'):
@@ -63,6 +96,8 @@ class QuestDescriptor:
                 cur = 'html'; quest[cur] = line[5:]
             elif line.startswith('file:'):
                 cur = 'file'; quest[cur] = line[5:]
+            elif line.startswith('timeout:'):
+                cur = 'timeout'; quest[cur] = line[8:]
             elif cur:
                 quest[cur] += line
         for q, v in quest.iteritems():

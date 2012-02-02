@@ -2,16 +2,52 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     
     <xsl:template match="view[@type = 'jury-quest-list']">
-        <xsl:variable name="questId"><xsl:value-of select="param[@name = 'questId']/@value" /></xsl:variable>
-        <xsl:variable name="questName"><xsl:value-of select="param[@name = 'questName']" /></xsl:variable>
+        <form style="display:none" id="post-form" name="post-form" method="POST">
+            <input type="hidden" name="questId" />
+            <input type="hidden" name="solution" />
+        </form>
+        <xsl:variable name="questId"><xsl:value-of select="quest/@id" /></xsl:variable>
+        <xsl:variable name="questName"><xsl:value-of select="quest/name" /></xsl:variable>
+        <xsl:variable name="needOpen"><xsl:value-of select="quest/param[@name = 'quest4open']/@value" /></xsl:variable>
+        <xsl:variable name="needClose"><xsl:value-of select="quest/param[@name = 'quest4close']/@value" /></xsl:variable>
         <xsl:variable name="ppndMode"><xsl:value-of select="@postponed"/></xsl:variable>
         <div class="page-header"><a href="login"><img src="static/images/quest.png" /></a></div>
         <div class="page-inform">
-            <p class="trail"><a href="quest">вернуться</a></p>
-            <p class="header"><xsl:value-of select="$questName" /> 
-                <xsl:if test="$ppndMode = 'true'">&#160;(непроверенные решения)</xsl:if>
-                <xsl:if test="not($ppndMode = 'true')">&#160;(решения)</xsl:if>
+            <p class="trail">
+                <xsl:if test="$needOpen = 'true'">
+                    <span class="link" onclick="openQuest('{$questId}');">открыть квест</span>
+                </xsl:if>
+                <xsl:if test="$needClose = 'true'">
+                    <span class="link" onclick="closeQuest('{$questId}');">закрыть квест</span>
+                </xsl:if>
+                <xsl:if test="$ppndMode = 'true'">
+                    <span class="link" onclick="getAllSolutions('{$questId}');">все решения</span>
+                    <span class="select-link">непроверенные</span>
+                </xsl:if>
+                <xsl:if test="$ppndMode != 'true'">
+                    <span class="select-link">все решения</span>
+                    <span class="link" onclick="getUncheckedSolutions('{$questId}');">непроверенные</span>
+                </xsl:if>
+                <a href="quest">вернуться</a>
             </p>
+            <p class="header">
+                <xsl:value-of select="$questName" /> (<xsl:value-of select="$questId" />) 
+            </p>
+            <table class="jlv-stat">
+                <tr> 
+                    <td class="jlv-stat-key">Команд, получивших задание: </td> 
+                    <td class="jlv-stat-value"><xsl:value-of select="quest/@got" /></td>
+                </tr> <tr> 
+                    <td class="jlv-stat-key"> Команд, сдавших задание: </td>
+                    <td class="jlv-stat-value"><xsl:value-of select="quest/@done" /></td>
+                </tr> <tr> 
+                    <td class="jlv-stat-key">Пытались сдать: </td>
+                    <td class="jlv-stat-value"><xsl:value-of select="quest/@tries" /></td>
+                </tr> <tr>
+                    <td class="jlv-stat-key">Время последней попытки: </td>
+                    <td class="jlv-stat-value"><xsl:value-of select="quest/@last" /></td>
+                </tr>
+            </table>
             <ul>
                 <xsl:for-each select="solution">
                     <li>

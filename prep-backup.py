@@ -1,7 +1,8 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python2.6
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
 import sys, random, optparse, logging, re
+from ConfigParser import ConfigParser
 
 from users import *
 from questserver import QuestServer
@@ -31,7 +32,11 @@ org  USERNAME AUTHSTRING"""
     userList = []
     with open(usersFile) as reader:
         for line in reader:
-            sRes = re.match("(\w+)\s+(\w+)\s+([<\w>]+)\s*$", line)
+            if line.strip().startswith('#'):
+                continue
+            if not re.match("^[\x01-\x7F]+$", line):
+                continue
+            sRes = re.match("(\w+)\s+(\S+)\s+([<\w>]+)\s*$", line)
             if sRes and sRes.group(1) in ("org", "team"):
                 userrole = sRes.group(1)
                 username = sRes.group(2)
@@ -43,10 +48,12 @@ org  USERNAME AUTHSTRING"""
 
 
 def CreateBackup(userList, restoreFlag):
-    srv = QuestServer("questserver.cfg", restoreFlag)
+    configurator = ConfigParser()
+    assert "questserver.cfg" in configurator.read("questserver.cfg")
+    srv = QuestServer(configurator, restoreFlag)
     for username, userrole, authstring in userList:
-        print "user: %s\trole: %s\tauth: %s\tcreated." % (username, userrole, authstring)
-        srv.CreateUser(username, userrole, authstring)
+        if srv.CreateUser(username, userrole, authstring):
+            print "user: %s\trole: %s\tauth: %s\tcreated." % (username, userrole, authstring)
     srv.Backup()
 
 

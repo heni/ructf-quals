@@ -3,7 +3,7 @@
     <xsl:template name="header">
         <html>
             <head>
-                <title>RuCTF Quals 2009</title>
+                <title>RuCTF Quals 2011</title>
                 <base href="{/response/@base}" />
                 <xsl:if test="/response/view[@type = 'monitor']">
                     <meta http-equiv="refresh" content="30;url=monitor" />

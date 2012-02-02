@@ -1,7 +1,7 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python2.6
 import cgitb
 from users import *
-import itertools, os, re, time
+import itertools, os, re, time, logging
 from xml.dom import minidom
 factory = minidom.Document()
 
@@ -31,14 +31,33 @@ class IReport:
     def GetXMLNode(self):
         return self.xmlNode
 
+
 class IViewer:
+    #this variable must be rewrited in qserver.py (during server start)
     BASE_URL = "http://localhost/qserver"
 
     def output(self, out):
         out.write('Content-Type: text/xml\n\n')
         out.write('<?xml version="1.0" encoding="utf-8" ?>\n')
         out.write('<?xml-stylesheet type="text/xsl" href="%s/static/qserver.xsl" ?>\n' % self.BASE_URL)
-        self.report.GetXMLNode().writexml(out, addindent = "    ", newl = "\n")
+        #self.report.GetXMLNode().writexml(out, addindent = "    ", newl = "\n")
+        self.report.GetXMLNode().writexml(out)
+
+
+class RedirectViewer(IViewer):
+    
+    def __init__(self, location, cookies=None):
+        self.location = location
+        if isinstance(cookies, dict):
+            cookies = ';'.join('%s=%s' % kv for kv in cookies.iteritems())
+        self.cookies = cookies
+
+    def output(self, out):
+        out.write('HTTP/1.1 302 Found\n')
+        out.write('Location: %s\n' % os.path.join(self.BASE_URL, self.location))
+        if self.cookies is not None:
+            out.write('Set-Cookie: %s\n' % self.cookies)
+        out.write('\n')
 
 
 """LoginView"""
@@ -57,14 +76,17 @@ class LoginViewer(IViewer):
 
 "HelloView"
 class HelloReport(IReport):
-    def __init__(self, username):
+    def __init__(self, username, usertype):
         self.xmlNode = self.CreateReportRoot()
         viewNode = self.CreateChild(self.xmlNode, "view", type = "hello")
+        self.CreateChild(viewNode, "param", name = "userrole", value = usertype)
         self.CreateChild(viewNode, "param", name = "username", value = username)
 
 class HelloViewer(IViewer):
     def __init__(self, user):
-        self.report = HelloReport(user.name)
+        usertype = "team" if isinstance(user, LegalUser) \
+                        else ("org" if isinstance(user, AdminUser) else "guest")
+        self.report = HelloReport(user.name, usertype)
 
 
 "ErrorView"
@@ -164,7 +186,7 @@ class MonitorReport(IReport):
                     status = "available" if qi[1] else "unavailable"
                     self.CreateChild(catNode, "quest", id = qId, label = questLabel, done = qi[2], status = status)
                 else:
-                    status = "postponed" if qi[3] > 0 else ("available" if qi[1] else "unavailable")
+                    status = "postponed" if qi[3] > 0 else ("j-available" if qi[1] else "j-unavailable")
                     self.CreateChild(catNode, "quest", id = qId, label = questLabel, done = qi[2], status = status, postponed = qi[3])
         rankNode = self.CreateChild(viewNode, "ranklist")
         for team, score in teams:
@@ -174,15 +196,45 @@ class MonitorViewer(IViewer):
     def __init__(self, stat, teams):
         self.report = MonitorReport(stat, teams)
 
+
+"NewsView"
+class NewsReport(IReport):
+    def __init__(self, news=None, prev=None, next=None, editable=False):
+        self.xmlNode = self.CreateReportRoot()
+        viewNode = self.CreateChild(self.xmlNode, "view", type="news")
+        self.CreateChild(viewNode, "param", name="prevPage", value=(prev if prev is not None else ""))
+        self.CreateChild(viewNode, "param", name="nextPage", value=(next if next is not None else ""))
+        self.CreateChild(viewNode, "param", name="editable", value = "true" if editable else "false")
+        for event in news:
+            newsNode = self.CreateChild(viewNode, "news", time=time.ctime(event.timeStamp), author=event.authorName, id=event.timeStamp)
+            try:
+                doc = minidom.parseString("<div class=\"news\">" + event.message.encode("utf-8") + "</div>")
+                newsNode.appendChild(doc.documentElement)
+            except:
+                logging.exception("while processing text [%s]", event.message)
+                self.CreateChild(newsNode, "div", **{"class": "news"}).appendChild(factory.createTextNode(event.message))
+
+class GV_News(IViewer):
+    def __init__(self, news=None, prev=None, next=None):
+        self.report = NewsReport(news, prev, next)
+
+class AV_News(IViewer):
+    def __init__(self, news=None, prev=None, next=None):
+        self.report = NewsReport(news, prev, next, True)
+
+
 "JuryQuestView"
 class JuryQuestListReport(IReport):
-    def __init__(self, questId, questName, solutions):
+    def __init__(self, questId, questName, questInfo):
         self.xmlNode = self.CreateReportRoot()
         viewNode = self.CreateChild(self.xmlNode, "view", type = "jury-quest-list")
-        self.CreateChild(viewNode, "param", name = "questId", value = questId)
-        self.CreateChild(viewNode, "param", name = "questName").appendChild(factory.createTextNode(questName))
+        questNode = self.CreateChild(viewNode, "quest", id=questId, 
+            got=questInfo["got"], done=questInfo["done"], tries=questInfo["tries"], last=questInfo.get("last", ""))
+        self.CreateChild(questNode, "name").appendChild(factory.createTextNode(questName))
+        self.CreateChild(questNode, "param", name = "quest4open", value="true" if not questInfo["available"] else "false")
+        self.CreateChild(questNode, "param", name = "quest4close", value="true" if (questInfo["available"] and questInfo["got"] == 0) else "false")
         ppndFlag = True
-        for sol in sorted(solutions, key = lambda s: s.timeStamp):
+        for sol in sorted(questInfo["sollist"], key = lambda s: s.timeStamp):
             status = {True: "accepted", False: "rejected", None: "postponed"}[sol.status]
             solNode = self.CreateChild(viewNode, "solution", time = time.ctime(sol.timeStamp), 
                                         team = sol.username, id = sol.solutionID, status = status)
@@ -201,13 +253,13 @@ class JuryQuestGetReport(IReport):
                 id = sol.solutionID, status = status)
         solNode.appendChild(factory.createTextNode(sol.actionString))
         if re.match("[-A-Za-z0-9_\.]+$", sol.actionString) and os.path.isfile(os.path.join("upload", sol.actionString)):
-            solNode.setAttribute("file", os.path.join("upload", sol.actionString))
+            solNode.setAttribute("file", os.path.join("upload-files", sol.actionString))
         CreateVerdictNode(solNode, status, sol.verdict)
 
 class JuryQuestViewer(IViewer):
-    def __init__(self, qd, questId, questName, sol):
+    def __init__(self, qd, questId, questName, *args):
         if qd:
-            self.report = JuryQuestGetReport(qd, questId, questName, sol)
+            self.report = JuryQuestGetReport(qd, questId, questName, *args)
         else:
-            self.report = JuryQuestListReport(questId, questName, sol)
+            self.report = JuryQuestListReport(questId, questName, *args)
 

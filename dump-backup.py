@@ -1,30 +1,23 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python2.6
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
-import sys, random, optparse, logging, re, time, codecs
+import sys, random, logging, re, time, codecs
+from ConfigParser import ConfigParser
 
 from users import *
 from questserver import QuestServer
 from dispatcher import SmartDecoder
 
-def parse_args():
-    parser = optparse.OptionParser(description = "prepares new backup directory")
-    parser.set_defaults(bootMode = None)
-    parser.add_option("--boot", dest = "bootMode", type = "choice", choices = ["clean", "work"], metavar = "MODE",
-        help = "set preparation mode (clean: create new backup dir; work: change existing backup dir)")
-    parser.add_option("--users", dest = "usersFile", metavar = "FILE", help = "set file with user accounts")
-    opt, args = parser.parse_args()
-    if opt.bootMode is None or opt.usersFile is None:
-        parser.error("necessary options are skipped")
-    return opt, args
-
-
 def DumpBackup():
-    srv = QuestServer("questserver.cfg", True)
+    configurator = ConfigParser()
+    assert "questserver.cfg" in configurator.read("questserver.cfg")
+    srv = QuestServer(configurator, True)
     auth = srv.authorizer
     out = codecs.lookup("utf-8")[3](sys.stdout)
-    for authstring, user in auth.users.iteritems():
-        print >>out, "user: %s\trole: %s\tauthstring: %s" % (user.name, user.profile.GetProperty("role").GetValue(), authstring)
+    for authstring, username in auth.users.iteritems():
+        user = auth.objects[username]
+        print >>out, "teamID: %s, user: %s\trole: %s\tauthstring: %s" \
+            % (user.profile.GetProperty("teamID").GetValue(), user.name, user.profile.GetProperty("role").GetValue(), authstring)
         if isinstance(user, LegalUser):
             userScore = srv.tracker.GetTeamScore(user.name)
             print >>out, "\tscore: %s\n\tTask actions:" % userScore

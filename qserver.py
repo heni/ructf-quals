@@ -1,7 +1,8 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python2.6
 from __future__ import with_statement
 import fcgi, os, sys, threading, signal, time
 import logging, logging.handlers
+from ConfigParser import ConfigParser
 
 from dispatcher import RequestDispatcher, Request, ExitRequest
 from questserver import QuestServer
@@ -9,8 +10,8 @@ from balancer import LoadBalancer
 from viewers import IViewer
 
 
-def prepareLogger():
-    LOG_DIRNAME = "/tmp/qserver"
+def prepareLogger(logDir):
+    LOG_DIRNAME = logDir
     if not os.path.isdir(LOG_DIRNAME):
         os.makedirs(LOG_DIRNAME)
     LOG_FILENAME = os.path.join(LOG_DIRNAME, "qserver.log")
@@ -26,9 +27,11 @@ class FCGIServer:
     configFile = "questserver.cfg"
 
     def __init__(self):
-        prepareLogger()
+        configurator = ConfigParser()
+        assert self.configFile in configurator.read(self.configFile), "Application missconfigure"
+        prepareLogger(configurator.get("DEFAULT", "log_dir"))
         self.balancer = LoadBalancer()
-        self.srv = QuestServer(self.configFile, True)
+        self.srv = QuestServer(configurator, True)
         self.working = True
         Request.BASE_PATH = self.srv.basePath
         IViewer.BASE_URL = self.srv.baseUrl

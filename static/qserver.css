@@ -1,10 +1,25 @@
-html, body {color: lightgreen; background-color: black; /*font-family: monospace;*/ font-family: Courier New; font-size: 0.9em; height: 100%}
-div.page-header {font-size: 4em; margin: 0px auto 20px ; text-align: center}
+html, body {
+    color: lightgreen; 
+    background-color: black; 
+    font-family: Courier New; 
+    font-size: 0.9em; 
+    height: 100%
+}
+
+div.page-header {
+    font-size: 4em; 
+    margin: 0px auto 20px; 
+    text-align: center
+}
+
 div.page-header a {text-decoration: none}
 div.page-header a img {border: none}
 
 a {color: lightgreen}
+span.link {color: lightgreen; text-decoration:underline; cursor: pointer; margin-right: 2em}
+span.select-link {color: green; font-weight: bolder; margin-right: 2em}
 
+.link {cursor:pointer}
 .button {border: 1px solid green; background-color: transparent; color: green; margin: 5px}
 .button:hover {border-left-style: inset; border-top-style: inset; border-right-style: outset; border-bottom-style: outset}
 
@@ -15,13 +30,19 @@ a {color: lightgreen}
 
 .trail {text-align: right; margin: 0 0 -1em 0; height: 1em;}
 .header {text-align: center; font-weight: bold; font-size: 2em}
-.link {cursor:pointer}
+
+.nav-wrapper {height: 1em; width: 100%;}
+.nav-prev {float: left; margin-left: 1em; }
+.nav-next {float: right; margin-right: -1em; } 
 
 .small-header {font-size: 1.3em; margin: 2em 0 0 0;}
 .team-select {font-weight: bold}
 .time {font-size: 0.8em; color: gray}
 
-hr.news {width: 80%; border: outset green 2px; margin-bottom: 2em}
+div.news {float: left; width: 75%}
+hr.news {width: 80%; border: outset green 2px; margin-bottom: 2em; clear: both}
+.news-del-btn {width: 7em; text-align: center; float: right;}
+.news-add-btn {width: 10em; text-align: center; margin: 0 auto;}
 
 table.quest-selector {border-collapse: collapse; border: 1px dashed green; width: 80%; margin: 10px auto;}
 table.quest-selector td {width:12.5%; margin: 0; padding: 10px; vertical-align: top}
@@ -37,6 +58,8 @@ table.quest-monitor td ul {margin: 0px; padding: 10px 0; list-style: none; text-
 table.quest-monitor td ul li {margin:10px 0px; white-space: nowrap}
 table.quest-monitor td ul li.available {color: green; border: 1px dashed green}
 table.quest-monitor td ul li.unavailable {color: gray; border: 1px dashed gray}
+table.quest-monitor td ul li.j-available {color: green; border: 1px dashed green; cursor: pointer}
+table.quest-monitor td ul li.j-unavailable {color: gray; border: 1px dashed gray; cursor: pointer}
 table.quest-monitor td ul li.postponed {color: orange; border: 1px dashed orange; cursor: pointer}
 
 table.ranklist {float: right}
@@ -62,3 +85,7 @@ div.page-footer {height: 2em; font-weight: bold; color: lightgray; text-align: c
 div.hidden {display: none}
 
 div#show-quest-block {border: double 4px green; position: absolute; left: 25%; right: 25%; width: 50%;}
+
+table.jlv-stat td {margin: 0 10px}
+td.jlv-stat-key   {text-align: right}
+td.jlv-stat-value {color: green; font-weight: bold}

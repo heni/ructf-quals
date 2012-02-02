@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python2.6
 # -*- encoding: utf-8 -*-
 import errors
 
@@ -10,6 +10,7 @@ class IProperty(object):
         self.name = name 
         self.description = description
         self.__value = defaultValue
+        self.__resetCount = 0
     
     def CheckProperty(self, value):
         return self.__value == value
@@ -19,6 +20,12 @@ class IProperty(object):
     
     def SetValue(self, value):
         self.__value = value
+
+    #использовать только для однократного установления значения
+    def ResetValue(self, value):
+        assert self.__resetCount == 0
+        self.__value = value
+        self.__resetCount += 1
 
 
 class CheckProperty(IProperty):
@@ -39,6 +46,7 @@ class UserProfile:
         self.__appendProperty(ReadOnlyProperty("role", "Уровень полномочий", role))
         self.__appendProperty(ReadWriteProperty("team", "Команда", ""))
         self.__appendProperty(ReadWriteProperty("city", "Город", ""))
+        self.__appendProperty(ReadOnlyProperty("teamID", "числовой идентификатор", None))
 
     def __appendProperty(self, prop):
         self.__properties[prop.name] = prop
@@ -81,18 +89,28 @@ class Authorizer:
 
     def __init__(self):
         self.users = {}
+        self.objects = {}
 
     def Authenticate(self, authstring):
         if authstring in self.users:
-            userobject = self.users[authstring]
+            username = self.users[authstring]
+            userobject = self.objects[username]
             return userobject
 
     def AddUser(self, authstring, userobject):
-        self.users[authstring] = userobject
+        username = userobject.name
+        teamID = len(self.users)
+        userobject.profile.GetProperty("teamID").ResetValue(teamID)
+        self.users[authstring] = username
+        self.objects[username] = userobject
 
     def GetTeams(self):
-        return [u for u in self.users.itervalues() if isinstance(u, LegalUser)]
+        return [u for u in self.objects.itervalues() if isinstance(u, LegalUser)]
 
     def GetAdmins(self):
-        return [u for u in self.users.itervalues() if isinstance(u, AdminUser)]
+        return [u for u in self.objects.itervalues() if isinstance(u, AdminUser)]
+
+    def GetTeamID(self, teamname):
+        if teamname in self.objects:
+            return self.objects[teamname].profile.GetProperty("teamID").GetValue()
 

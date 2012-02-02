@@ -15,9 +15,6 @@
                 <input class="button" type="submit" value="Послать" />
             </p>
 
-            <p style="text-align: right">
-                <a href="http://ructf.org/2009/registration">Зарегистрироваться</a>
-            </p>
         </form>
     </xsl:template>
 </xsl:stylesheet>

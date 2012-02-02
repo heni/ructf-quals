@@ -25,6 +25,9 @@
                             <xsl:attribute name="title">Есть ответы (<xsl:value-of select="@postponed" />), ожидающие решения</xsl:attribute>
                             <xsl:attribute name="onclick">showQuest('<xsl:value-of select="@id" />');</xsl:attribute>
                         </xsl:if>
+                        <xsl:if test="@status = 'j-available' or @status = 'j-unavailable'">
+                            <xsl:attribute name="onclick">showQuest('<xsl:value-of select="@id" />');</xsl:attribute>
+                        </xsl:if>
                         <xsl:value-of select="concat(@label, ' (', @done, '&#160;done)')" /> 
                     </li>
                 </xsl:for-each>
