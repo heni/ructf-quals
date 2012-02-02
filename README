@@ -1,4 +1,12 @@
  ==== Check system for RuCTF qualification games ====
+To run server you need:
+    * create questserver.cfg configuration file (see samples/questserver.cfg)
+    * create users listing (see sample/users.conf for file format)
+    * run ./prep-backup.py --boot clean --users users.conf for creating data
+    * run qserver.py as fast-cgi application for your appache/lighttpd web server
+
+ ==== Licension ====
+
 This project is distributed over GPLv3
 
 
