@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """Python Quest Module for xml-encoded quests
 Sample quest description:

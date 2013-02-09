@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python2
 import cgitb
 from users import *
 import itertools, os, re, time, logging

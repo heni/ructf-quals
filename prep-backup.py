@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
 import sys, random, optparse, logging, re

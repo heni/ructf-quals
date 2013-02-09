@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python2
 from __future__ import with_statement
 import fcgi, os, sys, threading, signal, time
 import logging, logging.handlers
@@ -91,5 +91,4 @@ if __name__ == "__main__":
         while threading.activeCount() > 1: 
             time.sleep(1)
     except:
-        logging.exception("accept queries exception") 
-
+        logging.exception("accept queries exception")

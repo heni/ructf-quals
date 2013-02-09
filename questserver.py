@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python2
 #-*- encoding: utf-8 -*-
 from __future__ import with_statement
 from common  import *
