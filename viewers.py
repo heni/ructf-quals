@@ -37,10 +37,10 @@ class IViewer:
     BASE_URL = "http://localhost/qserver"
 
     def output(self, out):
-        out.write('Content-Type: text/xml\n\n')
-        out.write('<?xml version="1.0" encoding="utf-8" ?>\n')
-        out.write('<?xml-stylesheet type="text/xsl" href="%s/static/qserver.xsl" ?>\n' % self.BASE_URL)
-        #self.report.GetXMLNode().writexml(out, addindent = "    ", newl = "\n")
+        out.write('Content-Type: text/xml\r\n\r\n')
+        out.write('<?xml version="1.0" encoding="utf-8" ?>\r\n')
+        out.write('<?xml-stylesheet type="text/xsl" href="%s/static/qserver.xsl" ?>\r\n' % self.BASE_URL)
+        #self.report.GetXMLNode().writexml(out, addindent = "    ", newl = "\r\n")
         self.report.GetXMLNode().writexml(out)
 
 
@@ -53,11 +53,11 @@ class RedirectViewer(IViewer):
         self.cookies = cookies
 
     def output(self, out):
-        out.write('HTTP/1.1 302 Found\n')
-        out.write('Location: %s\n' % os.path.join(self.BASE_URL, self.location))
+        out.write('Status: 302 Found\r\n')
+        out.write('Location: %s\r\n' % os.path.join(self.BASE_URL, self.location))
         if self.cookies is not None:
-            out.write('Set-Cookie: %s\n' % self.cookies)
-        out.write('\n')
+            out.write('Set-Cookie: %s\r\n' % self.cookies)
+        out.write('\r\n')
 
 
 """LoginView"""
