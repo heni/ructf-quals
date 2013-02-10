@@ -1,0 +1,26 @@
+<VirtualHost *:80>
+	ServerAdmin last_g@hackerdom.ru
+
+	DocumentRoot /var/www/
+	FastCgiServer /home/last-g/Workspace/ructf-quals/qserver.py
+
+	<Directory />
+		Options FollowSymLinks
+		AllowOverride None
+	</Directory>
+	
+	AliasMatch ^/qserver/(?!/*static).*$  /home/last-g/Workspace/ructf-quals/qserver.py
+	<LocationMatch ^/qserver/(?!/*static).*$>
+		Order allow,deny
+		Allow from all
+		SetHandler fastcgi-script
+	</LocationMatch>
+	
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+
+	# Possible values include: debug, info, notice, warn, error, crit,
+	# alert, emerg.
+	LogLevel warn
+
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
