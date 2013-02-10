@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
-import sys, codecs, urllib, logging, time
+import sys, codecs, logging, time
 from common import *
 from users import *
 from viewers import *
@@ -52,85 +52,61 @@ class ExitRequest(Request):
     def Finish(self):
         pass
 
+class DefaultHandlers(object):
+    """
+    Just collection of default handlers for HTTP request.
+    RequestDispatcher calls them when appropriative request are comming
+    """
+    @staticmethod
+    def Deferred(dispatcher, user, viewer):
+        return RedirectViewer("deferred?id=%s" % dispatcher.srv.RegisterViewer(user, viewer))
 
-
-class RequestDispatcher:
-    dispatchTable = {}
-    processedCount = 0
-
-    def __init__(self, srv):
-        self.srv = srv
-
-    def check_auth(self, request):
-        user = None
-        if 'auth' in request.cookie:
-            user = self.srv.Authenticate(request.cookie['auth'])
-        return user or GuestUser()
-
-    def Deferred(self, user, viewer):
-        return RedirectViewer("deferred?id=%s" % self.srv.RegisterViewer(user, viewer))
-
-    def dispatch(self, request):
-        try:
-            user = self.check_auth(request)
-            if request.command not in self.dispatchTable:
-                request.command = "default"
-            viewer = self.dispatchTable[request.command](self, request.subcommand, user, **request.keywords)
-        except:
-            logging.exception("while dispatcher request")
-            viewer = ErrorViewer(message = "Сервер не понимает что вы от него хотите")
-        try:
-            self.processedCount += 1
-            viewer.output(request.outstream)
-        finally:
-            request.Finish()
-
-    def do_login(self, subcommand, user, req = None, auth = "", count = "-1", **kws):
+    @staticmethod
+    def do_login(dispatcher, subcommand, user, req = None, auth = "", count = "-1", **kws):
         if isinstance(user, GuestUser):
             if auth:
-                user = self.srv.Authenticate(auth)
+                user = dispatcher.srv.Authenticate(auth)
                 if not isinstance(user, GuestUser):
                     return RedirectViewer("login", cookies={'auth': auth})
             return LoginViewer(tryCount = int(count) + 1)
         return HelloViewer(user)
-    dispatchTable['login'] = do_login
-
-    def do_fetchview(self, subcommand, user, id = "", **kws):
-        viewer = self.srv.GetViewer(user, str(id))
+    @staticmethod
+    def do_fetchview(dispatcher, subcommand, user, id = "", **kws):
+        viewer = dispatcher.srv.GetViewer(user, str(id))
         if isinstance(viewer, IViewer):
             return viewer
         return ErrorViewer(message="Проверьте, что всё делает правильно")
-    dispatchTable['deferred'] = do_fetchview
 
-    def do_quest(self, subcommand, user, questId = None, actionString = "", solution = None, **kws):
+    @staticmethod
+    def do_quest(dispatcher, subcommand, user, questId = None, actionString = "", solution = None, **kws):
         if isinstance(user, LegalUser):
             if subcommand == "view" or not subcommand:
-                return QuestListViewer(self.srv, user)
+                return QuestListViewer(dispatcher.srv, user)
             elif subcommand == "get":
-                qd = self.srv.GetQuest(user.name, questId)
+                qd = dispatcher.srv.GetQuest(user.name, questId)
                 if qd: 
-                    return QuestViewer(qd, questId, self.srv.GetQuestName(questId))
+                    return QuestViewer(qd, questId, dispatcher.srv.GetQuestName(questId))
                 return ErrorViewer(message = "Вы не можете получить этот квест")
             elif subcommand == "check":
-                verdict = self.srv.CheckQuest(user.name, questId, actionString)
+                verdict = dispatcher.srv.CheckQuest(user.name, questId, actionString)
                 if verdict: 
-                    viewer = QuestCheckViewer(verdict, questId, self.srv.GetQuestName(questId))
+                    viewer = QuestCheckViewer(verdict, questId, dispatcher.srv.GetQuestName(questId))
                 else:
                     viewer = ErrorViewer(message = "Вы не можете отправлять решения для этого квеста. Возможно вы отвечаете слишком быстро :)")
-                return self.Deferred(user, viewer)
+                return DefaultHandlers.Deferred(dispatcher,user, viewer)
         elif isinstance(user, AdminUser):
             if not subcommand or subcommand in ("accept", "all", "get", "reject", "open", "close"):
                 if not questId:
-                    return MonitorViewer(*self.srv.GetJuryMonitor())
+                    return MonitorViewer(*dispatcher.srv.GetJuryMonitor())
                 if subcommand in ("open", "close"):
                     if subcommand == "open":
-                        self.srv.tracker.OpenQuest(questId)
+                        dispatcher.srv.tracker.OpenQuest(questId)
                     elif subcommand == "close":
-                        self.srv.tracker.CloseQuest(questId)
+                        dispatcher.srv.tracker.CloseQuest(questId)
                     return RedirectViewer("monitor")
-                questName = self.srv.GetQuestName(questId)
+                questName = dispatcher.srv.GetQuestName(questId)
                 if not solution:
-                    questInfo = self.srv.tracker.GetQuestStat(questId, checkAvailability=True)
+                    questInfo = dispatcher.srv.tracker.GetQuestStat(questId, checkAvailability=True)
                     solList = list(questInfo["sollist"])
                     questInfo["tries"] = len(solList)
                     if solList:
@@ -139,38 +115,38 @@ class RequestDispatcher:
                         solList = [s for s in solList if s.status is None]
                     questInfo["sollist"] = solList
                     return JuryQuestViewer(None, questId, questName, questInfo)
-                solList = self.srv.GetQuestSolutions(questId, lambda s: s.solutionID == solution)
+                solList = dispatcher.srv.GetQuestSolutions(questId, lambda s: s.solutionID == solution)
                 for sol in solList: #process only first solution if it exists
                     if subcommand == "get":
-                        qd = self.srv.GetQuest(sol.username, questId)
+                        qd = dispatcher.srv.GetQuest(sol.username, questId)
                         return JuryQuestViewer(qd, questId, questName, sol)
                     sol.ChangeVerdict(subcommand == "accept", actionString)
-                    logging.info("tracker changed: %s", self.srv.tracker.__dict__)
+                    logging.info("tracker changed: %s", dispatcher.srv.tracker.__dict__)
                     return RedirectViewer("monitor")
         return ErrorViewer(message = "Проверьте, что всё делаете правильно")
-    dispatchTable['quest'] = do_quest
 
+    @staticmethod
     def do_default(self, subcommand, user, auth = None, **kws):
         if isinstance(user, GuestUser):
             return LoginViewer(tryCount = 0)
         elif isinstance(user, LegalUser):
             return QuestListViewer(self.srv, user)
         return HelloViewer(user)
-    dispatchTable['default'] = do_default
 
+    @staticmethod
     def do_signout(self, subcommand, user, req = None, **kws):
         req.out.write('Set-Cookie: auth=\n')
         return LoginViewer(tryCount = 0)
-    dispatchTable['signout'] = do_signout
 
+    @staticmethod
     def do_monitor(self, subcommand, user, **kws):
         if isinstance(user, AdminUser):
             stat, teams = self.srv.GetJuryMonitor()
         else:
             stat, teams = self.srv.GetMonitor()
         return MonitorViewer(stat, teams)
-    dispatchTable['monitor'] = do_monitor
 
+    @staticmethod
     def do_news(self, subcommand, user, page = 0, event = None, text = None, **kws):
         if isinstance(user, LegalUser) or isinstance(user, GuestUser):
             return GV_News(**self.srv.ListNewsItems(page))
@@ -186,4 +162,54 @@ class RequestDispatcher:
                     return ErrorViewer(message = "Проверьте, что всё делаете правильно")
                 self.srv.DeleteNewsItem(event)
             return RedirectViewer("news")
-    dispatchTable['news'] = do_news
+
+
+
+
+class RequestDispatcher:
+    """
+    Gets request, check auth for user and calls appropriative handler for this request
+    To determine handler uses dispatchTable
+    """
+    dispatchTable = { 
+            'login'     : DefaultHandlers.do_login,
+            'deferred'  : DefaultHandlers.do_fetchview,
+            'news'      : DefaultHandlers.do_news,
+            'quest'     : DefaultHandlers.do_quest,
+            'monitor'   : DefaultHandlers.do_monitor,
+            'signout'   : DefaultHandlers.do_signout,
+            'default'   : DefaultHandlers.do_default,
+    }
+    processedCount = 0
+
+    def __init__(self, srv):
+        self.srv = srv
+        
+    def check_auth(self, request):
+        """
+        Just check is user valid using cookies
+        @return User object
+        """
+        user = None
+        if 'auth' in request.cookie:
+            user = self.srv.Authenticate(request.cookie['auth'])
+        return user or GuestUser()
+
+    def dispatch(self, request):
+        """ 
+        Runs Handler for the request
+        """
+        try:
+            user = self.check_auth(request)
+            if request.command not in self.dispatchTable:
+                request.command = "default"
+            viewer = self.dispatchTable[request.command](self, request.subcommand, user, **request.keywords)
+        except:
+            logging.exception("while dispatcher request")
+            viewer = ErrorViewer(message = "Сервер не понимает что вы от него хотите")
+        try:
+            self.processedCount += 1
+            viewer.output(request.outstream)
+        finally:
+            request.Finish()
+
