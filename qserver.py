@@ -38,9 +38,13 @@ class FCGIServer:
         self.working = True
         Request.BASE_PATH = self.srv.basePath
         IViewer.BASE_URL = self.srv.baseUrl
+
+        # Start threads
         for _ in xrange(self.srv.workersCount):
             threading.Thread(target = self.base_worker).start()
         threading.Thread(target = self.backup_worker).start()
+
+        # Setup signal handlers
         signal.signal(signal.SIGINT, self.signal_handler)
         signal.signal(signal.SIGTERM, self.signal_handler)
 
