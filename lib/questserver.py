@@ -3,7 +3,7 @@
 from __future__ import with_statement
 from common  import *
 from errors  import *
-from libquest import *
+from quest import *
 from users   import *
 from viewers import *
 

@@ -5,6 +5,15 @@ To run server you need:
     * run ./prep-backup.py --boot clean --users users.conf for creating data
     * run qserver.py as fast-cgi application for your appache/lighttpd web server
 
+Project structure:
+/                 root directory, where places executables and configurations
+├── conf          example configurations for HTTP server
+├── lib           all source code directory
+│   └── quest     package for handing different types of questions
+├── samples       example configuration files 
+├── static        static content for web server
+└── uploader      WAT?!
+
  ==== Licension ====
 
 This project is distributed over GPLv3

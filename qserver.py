@@ -1,9 +1,13 @@
 #!/usr/bin/env python2
+
 from __future__ import with_statement
-import fcgi, os, sys, threading, signal, time
+import os,sys, threading, signal, time
 import logging, logging.handlers
 from ConfigParser import ConfigParser
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
+
+import fcgi
 from dispatcher import RequestDispatcher, Request, ExitRequest
 from questserver import QuestServer
 from balancer import LoadBalancer
@@ -20,7 +24,6 @@ def prepareLogger(logDir):
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
     logger.addHandler(handler)
-        
 
 
 class FCGIServer:
@@ -87,7 +90,6 @@ if __name__ == "__main__":
     try:
         srv = FCGIServer()
         srv()
-        import time
         while threading.activeCount() > 1: 
             time.sleep(1)
     except:
