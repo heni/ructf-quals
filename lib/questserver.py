@@ -131,7 +131,7 @@ class ViewsStorage(Unpickable(container=dict)):
         if idx < len(userViewers):
             fID, fReport = userViewers[idx]
             if fID == viewID:
-                viewer = IViewer()
+                viewer = XMLViewer()
                 viewer.report = fReport
                 return viewer
 

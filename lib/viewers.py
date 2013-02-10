@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 import cgitb
 from users import *
-import itertools, os, re, time, logging
+import os, re, time, logging
 from xml.dom import minidom
 factory = minidom.Document()
 
@@ -10,7 +10,11 @@ factory = minidom.Document()
 # Base Interfaces #
 ###################
 
-class IReport:
+class IReport(object):
+    """
+    Represents body for IReport
+    Consists of XML document
+    """
     @staticmethod
     def CreateReportRoot():
         xmlNode = factory.createElement("response")
@@ -32,32 +36,82 @@ class IReport:
         return self.xmlNode
 
 
-class IViewer:
+class IViewer(object):
+    """
+    Represents CGI answer for WebServer
+    Contains headers and body
+
+    Headers is set of Name-Value pairs delimeted by ':'
+    Body is empty
+    """
     #this variable must be rewrited in qserver.py (during server start)
     BASE_URL = "http://localhost/qserver"
+    DELIMETER = "\r\n"
 
+    def __init__(self, *args, **kwargs):
+        self.headers = {}
+    
+    def default_headers(self):
+        return {
+            'Status' : '200 OK'
+        } 
+
+    def output_headers(self,out):
+        for name, value in self.headers.items():
+            out.write("{name}: {value}{DELIMETER}".format(
+                name=name, 
+                value=value,
+                DELIMETER=IViewer.DELIMETER
+                )
+            )
+        out.write(IViewer.DELIMETER)
+    def output_body(self, out):
+        pass
+        
     def output(self, out):
-        out.write('Content-Type: text/xml\r\n\r\n')
-        out.write('<?xml version="1.0" encoding="utf-8" ?>\r\n')
-        out.write('<?xml-stylesheet type="text/xsl" href="%s/static/qserver.xsl" ?>\r\n' % self.BASE_URL)
+        self.headers = getattr(self, 'headers', {})
+        for name, value in self.default_headers().items():
+            if name not in self.headers:
+                self.headers[name]=value
+
+        self.output_headers(out)
+        self.output_body(out)
+
+class XMLViewer(IViewer):
+    """    
+    Represents XML body answer for WebServer
+    """
+    def __init__(self, *args, **kwargs):
+        super(XMLViewer, self).__init__()
+
+    def default_headers(self):
+        return {
+            'Status'        : '200 OK',
+            'Content-Type'  : 'text/xml'
+        }
+    def output_body(self, out):
+        out.write('<?xml version="1.0" encoding="utf-8" ?>\n')
+        out.write('<?xml-stylesheet type="text/xsl" href="%s/static/qserver.xsl" ?>\n' % IViewer.BASE_URL)
         #self.report.GetXMLNode().writexml(out, addindent = "    ", newl = "\r\n")
         self.report.GetXMLNode().writexml(out)
+        
 
 
 class RedirectViewer(IViewer):
-    
     def __init__(self, location, cookies=None):
+        super(RedirectViewer, self).__init__()
         self.location = location
         if isinstance(cookies, dict):
             cookies = ';'.join('%s=%s' % kv for kv in cookies.iteritems())
         self.cookies = cookies
 
-    def output(self, out):
-        out.write('Status: 302 Found\r\n')
-        out.write('Location: %s\r\n' % os.path.join(self.BASE_URL, self.location))
         if self.cookies is not None:
-            out.write('Set-Cookie: %s\r\n' % self.cookies)
-        out.write('\r\n')
+            self.headers['Set-Cookie'] = self.cookies
+    def default_headers(self):
+        return { 
+            'Status' : '302 Found',
+            'Location' : os.path.join(IViewer.BASE_URL, self.location)
+        }
 
 
 """LoginView"""
@@ -69,7 +123,7 @@ class LoginReport(IReport):
         self.CreateChild(viewNode, "param", name = "source", value = sourceLocation)
 
 
-class LoginViewer(IViewer):
+class LoginViewer(XMLViewer):
     def __init__(self, tryCount = 0, sourceLocation = ""):
         self.report = LoginReport(tryCount, sourceLocation)
 
@@ -82,7 +136,7 @@ class HelloReport(IReport):
         self.CreateChild(viewNode, "param", name = "userrole", value = usertype)
         self.CreateChild(viewNode, "param", name = "username", value = username)
 
-class HelloViewer(IViewer):
+class HelloViewer(XMLViewer):
     def __init__(self, user):
         usertype = "team" if isinstance(user, LegalUser) \
                         else ("org" if isinstance(user, AdminUser) else "guest")
@@ -104,7 +158,7 @@ class ExceptionReport(IReport):
         traceNode = self.CreateChild(viewNode, "traceback")
         traceNode.appendChild(factory.createTextNode(unicode(cgitb.text((etype, evalue, etb)), "utf-8")))
  
-class ErrorViewer(IViewer):
+class ErrorViewer(XMLViewer):
     def __init__(self, message = "", exc = None, sourceLocation = ""):
         if message:
             self.report = ErrorReport(unicode(message, "utf-8"), sourceLocation)
@@ -124,7 +178,7 @@ class TeamQListReport(IReport):
                 status = {True: "completed", None: "available", False: "unavailable"}[done]
                 self.CreateChild(catnode, "quest", id = qId, status = status, label = questLabel)
 
-class QuestListViewer(IViewer):
+class QuestListViewer(XMLViewer):
     def __init__(self, srv, user):
         stat = srv.GetQuestList(user.name)
         self.report = TeamQListReport(stat)
@@ -139,7 +193,7 @@ class QuestGetReport(IReport):
         self.CreateChild(viewNode, "param", name = "questName").appendChild(factory.createTextNode(questName))
         viewNode.appendChild(qd.GetXMLNode())
 
-class QuestViewer(IViewer):
+class QuestViewer(XMLViewer):
     def __init__(self, qd, questId, questName):
         self.report = QuestGetReport(qd, questId, questName)
 
@@ -165,7 +219,7 @@ class QuestCheckReport(IReport):
         self.CreateChild(viewNode, "param", name = "questName").appendChild(factory.createTextNode(questName))
         CreateVerdictNode(viewNode, status, message)
 
-class QuestCheckViewer(IViewer):
+class QuestCheckViewer(XMLViewer):
     def __init__(self, verdict, questId, questName):
         self.report = QuestCheckReport(questId, questName, *verdict)
 
@@ -192,7 +246,7 @@ class MonitorReport(IReport):
         for team, score in teams:
             self.CreateChild(rankNode, "team", name = team.name, score = score)
 
-class MonitorViewer(IViewer):
+class MonitorViewer(XMLViewer):
     def __init__(self, stat, teams):
         self.report = MonitorReport(stat, teams)
 
@@ -214,11 +268,11 @@ class NewsReport(IReport):
                 logging.exception("while processing text [%s]", event.message)
                 self.CreateChild(newsNode, "div", **{"class": "news"}).appendChild(factory.createTextNode(event.message))
 
-class GV_News(IViewer):
+class GV_News(XMLViewer):
     def __init__(self, news=None, prev=None, next=None):
         self.report = NewsReport(news, prev, next)
 
-class AV_News(IViewer):
+class AV_News(XMLViewer):
     def __init__(self, news=None, prev=None, next=None):
         self.report = NewsReport(news, prev, next, True)
 
@@ -256,7 +310,7 @@ class JuryQuestGetReport(IReport):
             solNode.setAttribute("file", os.path.join("upload-files", sol.actionString))
         CreateVerdictNode(solNode, status, sol.verdict)
 
-class JuryQuestViewer(IViewer):
+class JuryQuestViewer(XMLViewer):
     def __init__(self, qd, questId, questName, *args):
         if qd:
             self.report = JuryQuestGetReport(qd, questId, questName, *args)
