@@ -1,8 +1,10 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
-import sys, random, logging, re, time, codecs
+import sys,os, random, logging, re, time, codecs
 from ConfigParser import ConfigParser
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
 
 from users import *
 from questserver import QuestServer
