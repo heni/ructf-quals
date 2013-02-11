@@ -4,6 +4,8 @@ from __future__ import with_statement
 import sys, random, logging, re, time, codecs
 from ConfigParser import ConfigParser
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
+
 from users import *
 from questserver import QuestServer
 from dispatcher import SmartDecoder
