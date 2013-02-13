@@ -1,2 +1,9 @@
 *.pyc
 /questserver.cfg
+/questserver.cfg.test
+/libquest
+/tasks
+/log
+/backup
+/.idea
+/*sublime*
