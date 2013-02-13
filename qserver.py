@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 
 from __future__ import with_statement
-import os,sys, threading, signal, time
+import os, sys, threading, signal, time
 import logging, logging.handlers
 from ConfigParser import ConfigParser
 
@@ -19,7 +19,7 @@ def prepareLogger(logDir):
     if not os.path.isdir(LOG_DIRNAME):
         os.makedirs(LOG_DIRNAME)
     LOG_FILENAME = os.path.join(LOG_DIRNAME, "qserver.log")
-    handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes = 50000000, backupCount = 5)
+    handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=50000000, backupCount=5)
     handler.setFormatter(logging.Formatter("%(asctime)s\t%(name)s\t%(module)s\t%(levelname)s:\t%(message)s"))
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
@@ -41,8 +41,8 @@ class FCGIServer:
 
         # Start threads
         for _ in xrange(self.srv.workersCount):
-            threading.Thread(target = self.base_worker).start()
-        threading.Thread(target = self.backup_worker).start()
+            threading.Thread(target=self.base_worker).start()
+        threading.Thread(target=self.backup_worker).start()
 
         # Setup signal handlers
         signal.signal(signal.SIGINT, self.signal_handler)
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     try:
         srv = FCGIServer()
         srv()
-        while threading.activeCount() > 1: 
+        while threading.activeCount() > 1:
             time.sleep(1)
     except:
         logging.exception("accept queries exception")

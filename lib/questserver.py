@@ -1,26 +1,32 @@
 #!/usr/bin/env python2
 #-*- encoding: utf-8 -*-
 from __future__ import with_statement
-from common  import *
-from errors  import *
-from quest import *
-from users   import *
-from viewers import *
-
-import imp, os, sys, re, logging, shutil, tempfile, itertools, time, weakref
+import imp
+import os
+import re
+import logging
+import shutil
+import tempfile
+import itertools
+import time
 import bisect
 import pickle as _pickle
 
+from common import *
+from errors import *
+from quest import *
+from users import *
+from viewers import *
 
-class QuestSolution(Unpickable(timeStamp=float, 
-                        username=str,
-                        actionString=unicode,
-                        callObject=default,
-                        solutionID=str,
-                        status=default,
-                        verdict=unicode)):
 
-    def __init__(self, username, actionString, verdictStatus, verdictMessage, ref = None):
+class QuestSolution(Unpickable(timeStamp=float,
+                               username=str,
+                               actionString=unicode,
+                               callObject=default,
+                               solutionID=str,
+                               status=default,
+                               verdict=unicode)):
+    def __init__(self, username, actionString, verdictStatus, verdictMessage, ref=None):
         super(QuestSolution, self).__init__()
         self.timeStamp = time.time()
         self.username = username
@@ -37,10 +43,9 @@ class QuestSolution(Unpickable(timeStamp=float,
 
 
 class QuestActions(Unpickable(descriptor=default,
-            solutions=list,
-            status=default,
-            callbacks=set)):
-
+                              solutions=list,
+                              status=default,
+                              callbacks=set)):
     def __init__(self):
         self.descriptor = None
         self.solutions = []
@@ -70,9 +75,8 @@ class QuestActions(Unpickable(descriptor=default,
 
 
 class NewsItem(Unpickable(timeStamp=float,
-                authorName=str,
-                message=unicode)):
-
+                          authorName=str,
+                          message=unicode)):
     def __init__(self, author, text):
         super(NewsItem, self).__init__()
         self.timeStamp = time.time()
@@ -82,7 +86,7 @@ class NewsItem(Unpickable(timeStamp=float,
 
 class NewsStorage(Unpickable(container=list)):
     news4page = 10
-   
+
     @classmethod
     def create(cls, o=None):
         if isinstance(o, cls):
@@ -101,14 +105,14 @@ class NewsStorage(Unpickable(container=list)):
 
     def ListNewsItems(self, pageID):
         pageID = int(pageID)
-        return {"news": self.container[pageID * self.news4page : (pageID + 1) * self.news4page], 
-            "next": pageID + 1 if (pageID + 1) * self.news4page < len(self.container) else None,
-            "prev": min(pageID - 1, len(self.container) / self.news4page) if pageID > 0 else None}
+        return {"news": self.container[pageID * self.news4page: (pageID + 1) * self.news4page],
+                "next": pageID + 1 if (pageID + 1) * self.news4page < len(self.container) else None,
+                "prev": min(pageID - 1, len(self.container) / self.news4page) if pageID > 0 else None}
 
 
 class ViewsStorage(Unpickable(container=dict)):
     PerUserViews = 50
-    
+
     @classmethod
     def create(cls, o=None):
         if isinstance(o, cls):
@@ -137,7 +141,6 @@ class ViewsStorage(Unpickable(container=dict)):
 
 
 class QuestHolder:
-
     def __init__(self, directory, description):
         items = description.split(":")
         loadFn = getattr(self, "load_" + items[0], None)
@@ -193,7 +196,7 @@ class QuestHolder:
 
     def SaveState(self, directory):
         saveId = re.sub(':', '-', self.GetId())
-        saveDir = tempfile.mkdtemp(prefix = "%s_" % saveId, dir = directory)
+        saveDir = tempfile.mkdtemp(prefix="%s_" % saveId, dir=directory)
         os.chmod(saveDir, 0777)
         self.provider.SaveState(saveDir)
         with open(os.path.join(directory, saveId), 'w') as savefile:
@@ -205,13 +208,12 @@ class QuestHolder:
             with open(os.path.join(directory, saveId), 'r') as savefile:
                 saveDir = _pickle.load(savefile)
                 saveDir = os.path.join(directory, os.path.split(saveDir)[1])
-            self.provider.LoadState(saveDir)      
+            self.provider.LoadState(saveDir)
         else:
             logging.warning("QuestHolder %s can't be restored", saveId)
 
 
 class TeamChangeCallback:
-
     def __init__(self, teamname, questId, tracker):
         self.tracker = tracker
         self.teamname = teamname
@@ -237,8 +239,8 @@ class AvailQuestChecker:
         self.tracker = tracker
         self.testMode = testMode
 
-    def IsQuestAvailable(self, qId, user = None):
-        if self.testMode or self.tracker.IsQuestOpenedManually(qId): 
+    def IsQuestAvailable(self, qId, user=None):
+        if self.testMode or self.tracker.IsQuestOpenedManually(qId):
             return True
         cat = qId.split(":")[0]
         if cat not in self.tracker.catlist: return False
@@ -261,21 +263,20 @@ class AvailQuestChecker:
 
 
 class TrackerInternals(Unpickable(teamActions=dict,
-                teamScores=emptydict,
-                questInfo=dict,
-                newsStorage=NewsStorage.create,
-                views=ViewsStorage.create)): pass
+                                  teamScores=emptydict,
+                                  questInfo=dict,
+                                  newsStorage=NewsStorage.create,
+                                  views=ViewsStorage.create)): pass
 
 
 class TeamActionsTracker:
-
     def __init__(self, questserver):
         self.__dict__.update(TrackerInternals().__dict__)
         self.qholder = dict((qh.GetId(), qh) for qh in questserver.quest.itervalues())
         self.catlist = dict((catname, list(catlist)) for catname, catlist \
-                                in itertools.groupby(
-                                        sorted(self.qholder), 
-                                        key = lambda qId: self.qholder[qId].GetCategory()))
+            in itertools.groupby(
+            sorted(self.qholder),
+            key=lambda qId: self.qholder[qId].GetCategory()))
         self.availChecker = AvailQuestChecker(self, questserver.openAll)
 
     def GetTeamScore(self, teamname):
@@ -289,7 +290,7 @@ class TeamActionsTracker:
         return sum(int(qId.split(":")[-1]) for qId, st in self.GetTeamQuestFreeze(teamname) if st)
 
     def RankTeams(self, teamlist):
-        return sorted(teamlist, key = lambda team: self.GetTeamScore(team.name), reverse = True)
+        return sorted(teamlist, key=lambda team: self.GetTeamScore(team.name), reverse=True)
 
     def GetTeamQuestFreeze(self, teamname):
         actions = self.teamActions.get(teamname, {})
@@ -298,13 +299,13 @@ class TeamActionsTracker:
     def CheckQuestDepends(self, teamname, qId):
         return self.availChecker.IsQuestAvailable(qId, teamname)
 
-    def GetTeamAction(self, teamname, qId, create = False):
+    def GetTeamAction(self, teamname, qId, create=False):
         if create and self.CheckQuestDepends(teamname, qId):
             qi = self.teamActions.setdefault(teamname, {})
             if qId not in qi:
                 qi[qId] = act = QuestActions()
                 act.SetChangeCallback(TeamChangeCallback(teamname, qId, self))
-        return  self.teamActions.get(teamname, {}).get(qId, None)
+        return self.teamActions.get(teamname, {}).get(qId, None)
 
     def GetQuest(self, teamname, teamID, qId):
         act = self.GetTeamAction(teamname, qId, True)
@@ -314,12 +315,12 @@ class TeamActionsTracker:
             if isinstance(gotInformation, set): #LEGACY scheme
                 gotInformation = self.questInfo.setdefault(qId, {})["got"] = dict((u, 0.0) for u in gotInformation)
             if gotInformation.get(teamname, 0.0) < questHolder.GetSerial() \
-                    or act.descriptor is None \
-                    or getattr(act.descriptor, "waitingTime") and act.descriptor.waitingTime < time.time():
+                or act.descriptor is None \
+                or getattr(act.descriptor, "waitingTime") and act.descriptor.waitingTime < time.time():
                 act.descriptor = self.qholder[qId].CreateQuest(teamID)
                 gotInformation[teamname] = questHolder.GetSerial()
             return act.descriptor
-        
+
     def OnSubmit(self, teamname, qId, actionString):
         act = self.GetTeamAction(teamname, qId, True)
         if act is not None and act.descriptor:
@@ -329,7 +330,7 @@ class TeamActionsTracker:
                 act.OnUserAction(QuestSolution(teamname, actionString, *verdict, **{'ref': act}))
                 return verdict
 
-    def IsQuestDone(self, qId, user = None):
+    def IsQuestDone(self, qId, user=None):
         doneSet = self.questInfo.get(qId, {}).get("done", set())
         return (user in doneSet) if user else bool(doneSet)
 
@@ -347,19 +348,22 @@ class TeamActionsTracker:
         gotTeams = qi.get("got", dict())
         doneCount = len(qi.get("done", set()))
         solList = itertools.chain(*(self.GetTeamAction(teamname, qId).solutions for teamname in gotTeams))
-        return {"got": len(gotTeams), "done": doneCount, "sollist": solList, 
-            "available": self.CheckQuestDepends(None, qId) if checkAvailability else None}
+        return {"got": len(gotTeams), "done": doneCount, "sollist": solList,
+                "available": self.CheckQuestDepends(None, qId) if checkAvailability else None}
 
     def GetTeamStat(self, teamname):
         freeze = dict(self.GetTeamQuestFreeze(teamname))
+
         def infoFun(qId, availFlag):
             if freeze[qId]: return qId, True
             return qId, None if availFlag else False
+
         return self.availChecker.GetStat(infoFun)
 
     def GetCommonStat(self):
         def infoFun(qId, availFlag):
             return qId, availFlag, len(self.questInfo.get(qId, {}).get("done", set()))
+
         return self.availChecker.GetStat(infoFun)
 
     def GetJuryStat(self):
@@ -367,7 +371,8 @@ class TeamActionsTracker:
             st = self.GetQuestStat(qId)
             doneCount = st["done"]
             postponedCount = len([1 for s in st["sollist"] if s.status is None])
-            return qId, availFlag, doneCount, postponedCount 
+            return qId, availFlag, doneCount, postponedCount
+
         return self.availChecker.GetStat(infoFun)
 
     def LoadState(self, file):
@@ -401,7 +406,7 @@ class TeamActionsTracker:
 class QuestServer:
     BACKUP_PREFIX = "backup_"
 
-    def __init__(self, configurator, restoreFlag = False):
+    def __init__(self, configurator, restoreFlag=False):
         self.Load(configurator)
         if not restoreFlag:
             self.BackupPrepare()
@@ -416,7 +421,7 @@ class QuestServer:
         categories = cp.get("DEFAULT", "categories").split(":")
         for cat in categories:
             name = cp.get(cat, "name")
-            directory = cp.get(cat, "dir")
+            directory = cp.get(cat, "dir", None)
             for opt in cp.options(cat):
                 desc = cp.get(cat, opt)
                 sRes = re.match("q(\d+)", opt)
@@ -428,7 +433,7 @@ class QuestServer:
                     except:
                         logging.exception("can't load quest provider %s", desc)
             self.catlist[cat] = name
-        #initialize backup subsystem
+            #initialize backup subsystem
         self.backupdir = cp.get("backup", "dir")
         self.backupcnt = cp.getint("backup", "savecount")
         self.backupidx = 0
@@ -451,15 +456,16 @@ class QuestServer:
             raise InitializationError("Please manually remove files from %s directory" % self.backupdir)
 
     def GetBackupList(self):
-        return sorted((item for item in os.listdir(self.backupdir) if self.GetBackupIndex(item) is not None), 
-                    reverse = True, key = self.GetBackupIndex)
+        return sorted((item for item in os.listdir(self.backupdir) if self.GetBackupIndex(item) is not None),
+                      reverse=True, key=self.GetBackupIndex)
 
     def GetBackupIndex(self, dir):
         if dir.startswith(self.BACKUP_PREFIX):
             return int(dir[len(self.BACKUP_PREFIX):], 16)
 
     def Restore(self):
-        assert os.path.isdir(self.backupdir), "Application can't restore. Backup directory [%s] doesn't exist" % self.backupdir
+        assert os.path.isdir(
+            self.backupdir), "Application can't restore. Backup directory [%s] doesn't exist" % self.backupdir
         backupList = self.GetBackupList()
         loadFlag = False
         for backupItem in backupList:
@@ -469,7 +475,7 @@ class QuestServer:
                 break
             except:
                 logging.exception("can't restore from %s, trying next", os.path.join(self.backupdir, backupItem))
-        assert loadFlag, "Application can't automatically restore" 
+        assert loadFlag, "Application can't automatically restore"
         self.backupidx = 1 + self.GetBackupIndex(backupList[0])
 
     def SaveState(self, directory):
@@ -539,7 +545,7 @@ class QuestServer:
     def GetJuryMonitor(self):
         return self.tracker.GetJuryStat(), self.GetRankedTeams()
 
-    def GetQuestSolutions(self, questId, filterFn = None):
+    def GetQuestSolutions(self, questId, filterFn=None):
         solList = itertools.ifilter(filterFn, self.tracker.GetQuestStat(questId)["sollist"])
         return solList
 
