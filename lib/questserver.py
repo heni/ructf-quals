@@ -278,6 +278,7 @@ class TeamActionsTracker:
             sorted(self.qholder),
             key=lambda qId: self.qholder[qId].GetCategory()))
         self.availChecker = AvailQuestChecker(self, questserver.openAll)
+        print "TeamActionsTracker::__init__. %s" % questserver.quest
 
     def GetTeamScore(self, teamname):
         score = self.teamScores.get(teamname, None)
@@ -310,7 +311,7 @@ class TeamActionsTracker:
     def GetQuest(self, teamname, teamID, qId):
         act = self.GetTeamAction(teamname, qId, True)
         if act is not None:
-            questHolder = self.qholder[qId]
+            questHolder = self.qholder[qId]            
             gotInformation = self.questInfo.setdefault(qId, {}).setdefault("got", {})
             if isinstance(gotInformation, set): #LEGACY scheme
                 gotInformation = self.questInfo.setdefault(qId, {})["got"] = dict((u, 0.0) for u in gotInformation)
@@ -358,6 +359,7 @@ class TeamActionsTracker:
             if freeze[qId]: return qId, True
             return qId, None if availFlag else False
 
+        logging.info("Tracker::GetTeamStat. self.availChecker.GetStat(infoFun) = %s" % self.availChecker.GetStat(infoFun))
         return self.availChecker.GetStat(infoFun)
 
     def GetCommonStat(self):
@@ -426,7 +428,7 @@ class QuestServer:
                 desc = cp.get(cat, opt)
                 sRes = re.match("q(\d+)", opt)
                 if sRes and desc != "none":
-                    try:
+                    try:                        
                         qholder = QuestHolder(directory, desc)
                         qId = qholder.provider.GetId()
                         self.quest[qId] = qholder

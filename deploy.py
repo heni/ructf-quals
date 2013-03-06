@@ -253,7 +253,7 @@ def make_cfgfile(qac, cfg_filename):
 
 def make_task_config(qac, tasks_filename, libquest_dir):
     cp = ConfigParser.RawConfigParser()
-    categories = {t.category for t in qac.tasks}
+    categories = set(t.category for t in qac.tasks)
     cp.set('DEFAULT', 'categories', ':'.join(map(str, categories)))
 
     for category in categories:

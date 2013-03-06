@@ -12,7 +12,7 @@ Project structure:
 │   └── quest     package for handing different types of questions
 ├── samples       example configuration files 
 ├── static        static content for web server
-└── uploader      WAT?!
+└── uploader      uploader for files from teams. Not used from RuCTF 2012
 
  ==== Licension ====
 

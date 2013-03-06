@@ -17,9 +17,11 @@ class Request(object):
         self.cookie = self.ParseCookie(req)
         self.remoteAddr = req.env.get("REMOTE_ADDR", "")
         fs = req.getFieldStorage()
-        self.keywords = {'req': req}
+        self.keywords = {'req': req, 'lang': 'en'}
         for p in fs:
             self.keywords[p] = SmartDecoder.decode(fs[p].value)
+        if "lang" in self.cookie and self.cookie["lang"] in ["ru", "en"]:
+            self.keywords["lang"] = self.cookie["lang"]
         logging.info("""
 \trequest: {REMOTE_ADDR: '%s', REQUEST_URI: '%s', HTTP_COOKIE: '%s'}
 \treqparam: %s""", req.env.get("REMOTE_ADDR"), req.env.get("REQUEST_URI"), req.env.get("HTTP_COOKIE"), self.keywords)
@@ -35,7 +37,7 @@ class Request(object):
 
     def ParseCookie(self, req):
         cookie = req.env.get("HTTP_COOKIE", "")
-        return dict(pv.split("=", 1) for pv in cookie.split(";") if pv and pv.find("=") >= 0)
+        return dict(pv.lstrip().split("=", 1) for pv in cookie.split(";") if pv and pv.find("=") >= 0)
 
     def Finish(self):
         self.req.Finish()
@@ -79,17 +81,17 @@ class DefaultHandlers(object):
         viewer = dispatcher.srv.GetViewer(user, str(id))
         if isinstance(viewer, IViewer):
             return viewer
-        return ErrorViewer(message="Проверьте, что всё делает правильно")
+        return ErrorViewer(message="Проверьте, что всё делаете правильно")
 
     @staticmethod
-    def do_quest(dispatcher, subcommand, user, questId=None, actionString="", solution=None, **kws):
+    def do_quest(dispatcher, subcommand, user, questId=None, actionString="", solution=None, lang="en", **kws):
         if isinstance(user, LegalUser):
             if subcommand == "view" or not subcommand:
                 return QuestListViewer(dispatcher.srv, user)
             elif subcommand == "get":
                 qd = dispatcher.srv.GetQuest(user.name, questId)
                 if qd:
-                    return QuestViewer(qd, questId, dispatcher.srv.GetQuestName(questId))
+                    return QuestViewer(qd, questId, dispatcher.srv.GetQuestName(questId), lang, user)
                 return ErrorViewer(message="Вы не можете получить этот квест")
             elif subcommand == "check":
                 verdict = dispatcher.srv.CheckQuest(user.name, questId, actionString)
@@ -119,12 +121,12 @@ class DefaultHandlers(object):
                     if subcommand != "all":
                         solList = [s for s in solList if s.status is None]
                     questInfo["sollist"] = solList
-                    return JuryQuestViewer(None, questId, questName, questInfo)
+                    return JuryQuestViewer(None, questId, questName, questInfo, lang, user)
                 solList = dispatcher.srv.GetQuestSolutions(questId, lambda s: s.solutionID == solution)
                 for sol in solList: #process only first solution if it exists
                     if subcommand == "get":
                         qd = dispatcher.srv.GetQuest(sol.username, questId)
-                        return JuryQuestViewer(qd, questId, questName, sol)
+                        return JuryQuestViewer(qd, questId, questName, sol, lang, user)
                     sol.ChangeVerdict(subcommand == "accept", actionString)
                     logging.info("tracker changed: %s", dispatcher.srv.tracker.__dict__)
                     return RedirectViewer("monitor")

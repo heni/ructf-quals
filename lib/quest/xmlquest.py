@@ -13,7 +13,7 @@ Sample quest description:
 
 Usage:
     try:
-        provider = XMLQuestProvider("arith-10.xml")
+        provider = XMLQuestnrovider("arith-10.xml")
     except e:
         print >>sys.stderr, "Can't create quest provider"
         sys.exit(1)
@@ -43,18 +43,14 @@ def GetText(nodes):
                 rc += node.data
         rc = rc.strip()
     return rc
-        
-def ParseXMLQuest(file):
-    doc = parseXML(file)
-    root = doc.documentElement
-    assert root.tagName == "quest" 
-    assert root.getAttribute("proto") == "xmlquest-1.0"
+
+def ParseXMLQuestV1(root):
     quest = {
         "series": root.getAttribute("series"),
         "id": root.getAttribute("id"),
         "name": GetText(root.getElementsByTagName("name")),
-        "text": None,
-        "html": None,
+        "text": {"en": None, "ru": None},
+        "html": {"en": None, "ru": None},
         "solution": [],
         "uncheck_verdict": None,
         "file": GetText(root.getElementsByTagName("file"))
@@ -66,10 +62,47 @@ def ParseXMLQuest(file):
         quest["uncheck_verdict"] = False if checker.getAttribute("strict").lower() == "yes" else None
     taskNode = root.getElementsByTagName("task")[0]
     if taskNode.getAttribute("type") == "html":
-        quest["html"] = '<?xml version="1.0" encoding="utf-8" ?>' + ''.join(ch.toxml() for ch in taskNode.childNodes).encode('utf-8')
+        quest["html"]["en"] = quest["html"]["ru"] = '<?xml version="1.0" encoding="utf-8" ?>' + ''.join(ch.toxml() for ch in taskNode.childNodes).encode('utf-8')
     else:
-        quest["text"] = GetText([taskNode])
+        quest["text"]["en"] = quest["html"]["ru"] = GetText([taskNode])
     return quest
+
+def ParseXMLQuestV2(root):
+    quest = {
+        "series": root.getAttribute("series"),
+        "id": root.getAttribute("id"),
+        "name": GetText(root.getElementsByTagName("name")),
+        "text": {"en": None, "ru": None},
+        "html": {"en": None, "ru": None},
+        "solution": [],
+        "uncheck_verdict": None,
+        "file": GetText(root.getElementsByTagName("file"))
+        #"dependencies": [node.getAttribute("quest-id") for node in root.getElementsByTagName("dependency")]
+    }
+    if root.getElementsByTagName("checker"):
+        checker = root.getElementsByTagName("checker")[0]
+        quest["solution"] = [(GetText([node]), node.getAttribute("case").lower() != "insensitive") for node in checker.getElementsByTagName("solution")]
+        quest["uncheck_verdict"] = False if checker.getAttribute("strict").lower() == "yes" else None
+    for taskNode in root.getElementsByTagName("task"):
+        lang = taskNode.getAttribute("lang")
+        if not lang:
+            lang = "en"
+        if taskNode.getAttribute("type") == "html":
+            quest["html"][lang] = '<?xml version="1.0" encoding="utf-8" ?>' + ''.join(ch.toxml() for ch in taskNode.childNodes).encode('utf-8')
+        else:
+            quest["text"][lang] = GetText([taskNode])
+    return quest
+
+def ParseXMLQuest(file):
+    doc = parseXML(file)
+    root = doc.documentElement
+    assert root.tagName == "quest" 
+    proto = root.getAttribute("proto")
+    assert proto in ["xmlquest-1.0", "xmlquest-2.0"]
+    if proto == "xmlquest-1.0":
+        return ParseXMLQuestV1(root)
+    if proto == "xmlquest-2.0":
+        return ParseXMLQuestV2(root)
 
 
 class XMLQuestProvider:

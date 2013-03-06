@@ -196,17 +196,17 @@ class QuestListViewer(XMLViewer):
 
 "QuestView"
 class QuestGetReport(IReport):
-    def __init__(self, qd, questId, questName):
+    def __init__(self, qd, questId, questName, lang, user):
         self.xmlNode = self.CreateReportRoot()
         viewNode = self.CreateChild(self.xmlNode, "view", type="quest")
         self.CreateChild(viewNode, "param", name="questId", value=questId)
         self.CreateChild(viewNode, "param", name="questName").appendChild(factory.createTextNode(questName))
-        viewNode.appendChild(qd.GetXMLNode())
+        viewNode.appendChild(qd.GetXMLNode(lang, questId, user))
 
 
 class QuestViewer(XMLViewer):
-    def __init__(self, qd, questId, questName):
-        self.report = QuestGetReport(qd, questId, questName)
+    def __init__(self, qd, questId, questName, lang, user):
+        self.report = QuestGetReport(qd, questId, questName, lang, user)
 
 
 def CreateVerdictNode(root, status, message):
@@ -298,7 +298,7 @@ class AV_News(XMLViewer):
 
 "JuryQuestView"
 class JuryQuestListReport(IReport):
-    def __init__(self, questId, questName, questInfo):
+    def __init__(self, questId, questName, questInfo, lang, user):
         self.xmlNode = self.CreateReportRoot()
         viewNode = self.CreateChild(self.xmlNode, "view", type="jury-quest-list")
         questNode = self.CreateChild(viewNode, "quest", id=questId,
@@ -318,12 +318,12 @@ class JuryQuestListReport(IReport):
 
 
 class JuryQuestGetReport(IReport):
-    def __init__(self, qd, questId, questName, sol):
+    def __init__(self, qd, questId, questName, sol, lang, user):
         self.xmlNode = self.CreateReportRoot()
         viewNode = self.CreateChild(self.xmlNode, "view", type="jury-quest-get")
         self.CreateChild(viewNode, "param", name="questId", value=questId)
         self.CreateChild(viewNode, "param", name="questName").appendChild(factory.createTextNode(questName))
-        viewNode.appendChild(qd.GetXMLNode())
+        viewNode.appendChild(qd.GetXMLNode(lang, questId, user))
         status = {True: "accepted", False: "rejected", None: "postponed"}[sol.status]
         solNode = self.CreateChild(viewNode, "solution", time=time.ctime(sol.timeStamp), team=sol.username,
                                    id=sol.solutionID, status=status)

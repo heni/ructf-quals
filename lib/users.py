@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 # -*- encoding: utf-8 -*-
 import errors
+import logging
 
 __all__ = ['Authorizer', 'GuestUser', 'LegalUser', 'AdminUser', 'UserProfile']
 
@@ -92,6 +93,7 @@ class Authorizer:
         self.objects = {}
 
     def Authenticate(self, authstring):
+        logging.debug("Authentication: %s, users = %s" % (authstring, self.users))
         if authstring in self.users:
             username = self.users[authstring]
             userobject = self.objects[username]
