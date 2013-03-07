@@ -126,7 +126,8 @@ class DefaultHandlers(object):
                 for sol in solList: #process only first solution if it exists
                     if subcommand == "get":
                         qd = dispatcher.srv.GetQuest(sol.username, questId)
-                        return JuryQuestViewer(qd, questId, questName, sol, lang, user)
+                        return JuryQuestViewer(qd, questId, questName, sol, lang, dispatcher.srv.authorizer.objects[sol.username])
+
                     sol.ChangeVerdict(subcommand == "accept", actionString)
                     logging.info("tracker changed: %s", dispatcher.srv.tracker.__dict__)
                     return RedirectViewer("monitor")

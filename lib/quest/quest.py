@@ -42,14 +42,6 @@ class QuestDescriptor(Unpickable(questID=str,
         if timeout:
             self.waitingTime = int(time.time() + timeout)
             self.xmlNode.setAttribute("waitingTime", time.ctime(self.waitingTime))
-        if file and (not os.access(file, os.R_OK) or not os.path.isfile(file)):
-            logging.warning("Can't get access to file '%s', skipping...", file)
-            file = None
-        if file:
-            view = factory.createElement("view")
-            view.setAttribute("mode", "attachment")
-            view.setAttribute("src", file)
-            self.xmlNode.appendChild(view)
         self.text, self.html, self.file = text, html, file
 
     def GetXMLCode(self, lang, questId, user):
@@ -94,6 +86,15 @@ class QuestDescriptor(Unpickable(questID=str,
             view.appendChild(factory.createTextNode(text))
         xmlNode = copy.deepcopy(self.xmlNode)
         if view:
+            xmlNode.appendChild(view)
+ 
+        if self.file and (not os.access(self.file, os.R_OK) or not os.path.isfile(self.file)):
+            logging.warning("Can't get access to file '%s', skipping...", self.file)
+            self.file = None
+        if self.file:
+            view = factory.createElement("view")
+            view.setAttribute("mode", "attachment")
+            view.setAttribute("src", self.file)
             xmlNode.appendChild(view)
         return xmlNode
 

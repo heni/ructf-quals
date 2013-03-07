@@ -13,7 +13,7 @@ Sample quest description:
 
 Usage:
     try:
-        provider = XMLQuestnrovider("arith-10.xml")
+        provider = XMLQuestProvider("arith-10.xml")
     except e:
         print >>sys.stderr, "Can't create quest provider"
         sys.exit(1)
