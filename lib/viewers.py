@@ -3,6 +3,7 @@ import cgitb
 from users import *
 import os, re, time, logging
 from xml.dom import minidom
+import logging
 
 factory = minidom.Document()
 
@@ -87,6 +88,8 @@ class XMLViewer(IViewer):
     """
 
     def __init__(self, *args, **kwargs):
+        logging.info("%s" % args)
+        logging.info("%s" % kwargs)
         super(XMLViewer, self).__init__()
 
     def default_headers(self):
@@ -97,7 +100,7 @@ class XMLViewer(IViewer):
 
     def output_body(self, out):
         out.write('<?xml version="1.0" encoding="utf-8" ?>\n')
-        out.write('<?xml-stylesheet type="text/xsl" href="%s/static/qserver.xsl" ?>\n' % IViewer.BASE_URL)
+        out.write('<?xml-stylesheet type="text/xsl" href="%s/static/qserver.en.xsl" ?>\n' % IViewer.BASE_URL)
         #self.report.GetXMLNode().writexml(out, addindent = "    ", newl = "\r\n")
         self.report.GetXMLNode().writexml(out)
 
