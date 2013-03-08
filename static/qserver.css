@@ -1,6 +1,6 @@
 html, body {
-    color: lightgreen; 
-    background-color: black; 
+    color: #8DC63F; 
+    background-color: #202020; 
     font-family: Courier New; 
     font-size: 0.9em; 
     height: 100%
@@ -15,8 +15,8 @@ div.page-header {
 div.page-header a {text-decoration: none}
 div.page-header a img {border: none}
 
-a {color: lightgreen}
-span.link {color: lightgreen; text-decoration:underline; cursor: pointer; margin-right: 2em}
+a {color: #8DC63F}
+span.link {color: #8DC63F; text-decoration:underline; cursor: pointer; margin-right: 2em}
 span.select-link {color: green; font-weight: bolder; margin-right: 2em}
 
 .link {cursor:pointer}
@@ -47,7 +47,7 @@ hr.news {width: 80%; border: outset green 2px; margin-bottom: 2em; clear: both}
 .news-add-btn {width: 10em; text-align: center; margin: 0 auto;}
 
 table.quest-selector {border-collapse: collapse; border: 1px dashed green; width: 80%; margin: 10px auto;}
-table.quest-selector td {min-width:12.5%; margin: 0; padding: 10px; vertical-align: top}
+table.quest-selector td {min-width:10%; margin: 0; padding: 10px; vertical-align: top}
 table.quest-selector td ul {margin: 0px; padding: 10px 0; list-style: none; text-align: center; width:100%;}
 table.quest-selector td ul li {margin:10px 0px; white-space: nowrap}
 table.quest-selector td ul li.available {color: green; border: 1px dashed green; cursor: pointer}
@@ -55,7 +55,7 @@ table.quest-selector td ul li.unavailable {color: gray; border: 1px dashed gray}
 table.quest-selector td ul li.completed {color: green; border: 1px solid green}
 
 table.quest-monitor {border-collapse: collapse; border: 1px dashed green; width: 80%; margin: 10px 0 0 0; float: left;}
-table.quest-monitor td {min-width:12.5%; margin: 0; padding: 10px; vertical-align: top}
+table.quest-monitor td {min-width:10%; margin: 0; padding: 10px; vertical-align: top}
 table.quest-monitor td ul {margin: 0px; padding: 10px 0; list-style: none; text-align: center; width:100%;}
 table.quest-monitor td ul li {margin:10px 0px; white-space: nowrap}
 table.quest-monitor td ul li.available {color: green; border: 1px dashed green}
