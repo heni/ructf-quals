@@ -6,7 +6,7 @@
         <xsl:variable name="questName"><xsl:value-of select="param[@name = 'questName']" /></xsl:variable>
         <div class="page-header"><a href="login"><img src="static/images/quest.png" /></a></div>
         <div class="page-inform">
-            <p class="trail"><a href="quest/view">к квестам</a></p>
+            <p class="trail"><p class="trail-left"><a href="" onClick="changeLanguage('en'); location.reload(); return false">en</a>|<a href="" onClick="changeLanguage('ru'); location.reload(); return false;">ru</a></p><p class="trail-right"><a href="quest/view">to quests</a></p></p>
             <p class="header"><xsl:value-of select="$questName" /> </p>
             <xsl:apply-templates select="quest/view" />
             <form style="margin-top: 2em" method="post" action="quest/check">

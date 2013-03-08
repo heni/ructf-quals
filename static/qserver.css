@@ -29,6 +29,8 @@ span.select-link {color: green; font-weight: bolder; margin-right: 2em}
 .height-1em {min-height: 1em; height: 1em}
 
 .trail {text-align: right; margin: 0 0 -1em 0; height: 1em;}
+.trail-left {float: left;}
+.trail-right {float: right;}
 .header {text-align: center; font-weight: bold; font-size: 2em}
 
 .nav-wrapper {height: 1em; width: 100%;}
