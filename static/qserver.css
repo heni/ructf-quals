@@ -47,7 +47,7 @@ hr.news {width: 80%; border: outset green 2px; margin-bottom: 2em; clear: both}
 .news-add-btn {width: 10em; text-align: center; margin: 0 auto;}
 
 table.quest-selector {border-collapse: collapse; border: 1px dashed green; width: 80%; margin: 10px auto;}
-table.quest-selector td {width:12.5%; margin: 0; padding: 10px; vertical-align: top}
+table.quest-selector td {min-width:12.5%; margin: 0; padding: 10px; vertical-align: top}
 table.quest-selector td ul {margin: 0px; padding: 10px 0; list-style: none; text-align: center; width:100%;}
 table.quest-selector td ul li {margin:10px 0px; white-space: nowrap}
 table.quest-selector td ul li.available {color: green; border: 1px dashed green; cursor: pointer}
@@ -55,7 +55,7 @@ table.quest-selector td ul li.unavailable {color: gray; border: 1px dashed gray}
 table.quest-selector td ul li.completed {color: green; border: 1px solid green}
 
 table.quest-monitor {border-collapse: collapse; border: 1px dashed green; width: 80%; margin: 10px 0 0 0; float: left;}
-table.quest-monitor td {width:12.5%; margin: 0; padding: 10px; vertical-align: top}
+table.quest-monitor td {min-width:12.5%; margin: 0; padding: 10px; vertical-align: top}
 table.quest-monitor td ul {margin: 0px; padding: 10px 0; list-style: none; text-align: center; width:100%;}
 table.quest-monitor td ul li {margin:10px 0px; white-space: nowrap}
 table.quest-monitor td ul li.available {color: green; border: 1px dashed green}
@@ -64,7 +64,7 @@ table.quest-monitor td ul li.j-available {color: green; border: 1px dashed green
 table.quest-monitor td ul li.j-unavailable {color: gray; border: 1px dashed gray; cursor: pointer}
 table.quest-monitor td ul li.postponed {color: orange; border: 1px dashed orange; cursor: pointer}
 
-table.ranklist {float: right}
+table.ranklist {float: right; width: 20%;}
 table.ranklist th {padding-left: 0.3em; color: green}
 table.ranklist td {padding-left: 0.3em}
 table.ranklist td.teampos {color: green; text-align: right}
