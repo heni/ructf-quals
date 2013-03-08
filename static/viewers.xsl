@@ -15,6 +15,6 @@
             <xsl:apply-templates select="view" />
             <div class="page-pusher"></div>
         </div>
-        <div class="page-footer"> &#169;RuCTF Team 2011 </div>
+        <div class="page-footer"> &#169;RuCTF Team 2013 </div>
     </xsl:template>
 </xsl:stylesheet>
