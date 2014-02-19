@@ -28,7 +28,7 @@ Usage:
 """
 
 from xml.dom.minidom import parse as parseXML
-from quest import QuestDescriptor
+from .quest import QuestDescriptor
 import cgi, logging 
 
 def StripActionString(line):

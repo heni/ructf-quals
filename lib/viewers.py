@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 import cgitb
-from users import *
+from .users import *
 import os, re, time, logging
 from xml.dom import minidom
 import logging

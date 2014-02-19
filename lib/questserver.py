@@ -12,11 +12,11 @@ import time
 import bisect
 import pickle as _pickle
 
-from common import *
-from errors import *
-from quest import *
-from users import *
-from viewers import *
+from .common import *
+from .errors import *
+from .quest import *
+from .users import *
+from .viewers import *
 
 
 class QuestSolution(Unpickable(timeStamp=float,

@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import sys, codecs, logging, time
-from common import *
-from users import *
-from viewers import *
+from .common import *
+from .users import *
+from .viewers import *
 
 
 class Request(object):

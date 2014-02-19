@@ -10,7 +10,7 @@ import hashlib
 
 factory = minidom.Document()
 
-from common import *
+from ..common import *
 
 
 class QuestDescriptor(Unpickable(questID=str,

@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 # -*- encoding: utf-8 -*-
-import errors
+from . import errors
 import logging
 
 __all__ = ['Authorizer', 'GuestUser', 'LegalUser', 'AdminUser', 'UserProfile']

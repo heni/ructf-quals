@@ -5,8 +5,8 @@
 
 from subprocess import Popen, PIPE, CalledProcessError
 import logging, os, tempfile, shutil, time
-from quest import QuestDescriptor
-from common import *
+from .quest import QuestDescriptor
+from ..common import *
 
 class ScriptQuestError(Exception): pass
 
