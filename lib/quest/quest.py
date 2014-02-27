@@ -2,11 +2,10 @@
 from xml.dom import minidom
 import logging
 import os
-import cStringIO
 import time
 import copy
 import hashlib
-
+from ..six.moves import cStringIO
 
 factory = minidom.Document()
 

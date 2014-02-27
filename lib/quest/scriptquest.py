@@ -61,7 +61,7 @@ class ScriptQuestProvider:
     def SaveState(self, directory):
         shutil.rmtree(directory)
         shutil.copytree(self.dir, directory)
-        os.chmod(directory, 0777)
+        os.chmod(directory, 0o777)
 
     def LoadState(self, directory):
         shutil.rmtree(self.dir)

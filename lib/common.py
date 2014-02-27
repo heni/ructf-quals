@@ -2,6 +2,8 @@ from __future__ import with_statement
 import threading, time, logging, os, hashlib, re
 import types
 
+from . import six
+
 def default(o=None):
     return o
 
@@ -11,7 +13,7 @@ def emptydict(*argc):
 def Unpickable(**kws):
     class ObjBuilder(object):
         def __init__(self, desc):
-            if callable(desc):
+            if six.callable(desc):
                 self.fn = desc
                 self.defargs = ()
             elif isinstance(desc, (tuple, list)):
@@ -26,7 +28,7 @@ def Unpickable(**kws):
         
     class ObjUnpickler(object):
         def __setstate__(self, sdict):
-            for attr, builder in scheme.iteritems():
+            for attr, builder in six.iteritems(scheme):
                 try:
                     if attr in sdict:
                         sdict[attr] = builder(sdict[attr])
@@ -39,12 +41,12 @@ def Unpickable(**kws):
             setter(sdict)
 
         def __init__(self):
-            for attr, builder in scheme.iteritems():
+            for attr, builder in six.iteritems(scheme):
                 setattr(self, attr, builder())
             getattr(super(ObjUnpickler, self), "__init__")()
 
-    scheme = dict((attr, ObjBuilder(desc)) for attr, desc in kws.iteritems())
-    return ObjUnpickler 
+    scheme = dict((attr, ObjBuilder(desc)) for attr, desc in six.iteritems(kws))
+    return ObjUnpickler
 
 
 class PickableLock(Unpickable(_object = threading.Lock)):
