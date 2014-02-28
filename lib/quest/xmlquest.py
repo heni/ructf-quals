@@ -29,7 +29,6 @@ Usage:
 
 from xml.dom.minidom import parse as parseXML
 from .quest import QuestDescriptor
-import cgi, logging 
 
 def StripActionString(line):
     return line.strip()
@@ -130,16 +129,6 @@ class XMLQuestProvider:
 
     def GetName(self):
         return self.name
-
-    #def CheckDependencies(self, *solved):
-    #  acceptFlag = all([depQuest in solved for depQuest in self.dependencies])
-    #  return acceptFlag
-    #
-    #def GetTextDescription(self, qId):
-    #  return self.task
-    #
-    #def GetHTMLDescription(self, qId):
-    #  return cgi.escape(self.task)
 
     def OnUserAction(self, dscr, actionString):
         actionString = StripActionString(actionString)
