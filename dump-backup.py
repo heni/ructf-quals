@@ -12,7 +12,7 @@ from lib.users import *
 from lib.questserver import QuestServer
 from lib.dispatcher import SmartDecoder
 
-def DumpBackup():
+def DumpBackup(object):
     configurator = ConfigParser()
     assert "questserver.cfg" in configurator.read("questserver.cfg")
     srv = QuestServer(configurator, True)
