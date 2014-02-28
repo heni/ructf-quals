@@ -37,9 +37,11 @@ class QuestDescriptor(Unpickable(questID=str,
         self.questID = questID
         self.xmlNode = factory.createElement("quest")
         self.xmlNode.setAttribute("id", str(questID))
+        self.timeout = None
         if isinstance(timeout, (six.binary_type, six.text_type)):
             timeout = int(timeout.strip())
         if timeout:
+            self.timeout = timeout
             self.waitingTime = int(time.time() + timeout)
             self.xmlNode.setAttribute("waitingTime", time.ctime(self.waitingTime))
         self.text, self.html, self.file = text, html, file
