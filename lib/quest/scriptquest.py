@@ -10,7 +10,7 @@ from ..common import *
 
 class ScriptQuestError(Exception): pass
 
-class ScriptQuestProvider:
+class ScriptQuestProvider(object):
 
     def __init__(self, file):
         self.progname = file

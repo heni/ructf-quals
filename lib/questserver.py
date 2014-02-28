@@ -140,7 +140,7 @@ class ViewsStorage(Unpickable(container=dict)):
                 return viewer
 
 
-class QuestHolder:
+class QuestHolder(object):
     def __init__(self, directory, description):
         items = description.split(":")
         loadFn = getattr(self, "load_" + items[0], None)
@@ -213,7 +213,7 @@ class QuestHolder:
             logging.warning("QuestHolder %s can't be restored", saveId)
 
 
-class TeamChangeCallback:
+class TeamChangeCallback(object):
     def __init__(self, teamname, questId, tracker):
         self.tracker = tracker
         self.teamname = teamname
@@ -234,7 +234,7 @@ class TeamChangeCallback:
         logging.info("New values [questinfo: %s], [teamScores: %s]", tracker.questInfo, tracker.teamScores)
 
 
-class AvailQuestChecker:
+class AvailQuestChecker(object):
     def __init__(self, tracker, testMode=False):
         self.tracker = tracker
         self.testMode = testMode
@@ -269,7 +269,7 @@ class TrackerInternals(Unpickable(teamActions=dict,
                                   views=ViewsStorage.create)): pass
 
 
-class TeamActionsTracker:
+class TeamActionsTracker(object):
     def __init__(self, questserver):
         self.__dict__.update(TrackerInternals().__dict__)
         self.qholder = dict((qh.GetId(), qh) for qh in questserver.quest.itervalues())
@@ -405,7 +405,7 @@ class TeamActionsTracker:
         _pickle.dump(internals, file)
 
 
-class QuestServer:
+class QuestServer(object):
     BACKUP_PREFIX = "backup_"
 
     def __init__(self, configurator, restoreFlag=False):

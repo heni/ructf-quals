@@ -39,7 +39,7 @@ class ReadWriteProperty(IProperty):
     pass
 
 
-class UserProfile:
+class UserProfile(object):
 
     def __init__(self, nick, role):
         self.__properties = {}
@@ -86,7 +86,7 @@ class AdminUser(IUser):
         self.profile = UserProfile(nick, "org")
 
 
-class Authorizer:
+class Authorizer(object):
 
     def __init__(self):
         self.users = {}

@@ -104,7 +104,7 @@ def ParseXMLQuest(file):
         return ParseXMLQuestV2(root)
 
 
-class XMLQuestProvider:
+class XMLQuestProvider(object):
 
     def __init__(self, file):
         descriptor = ParseXMLQuest(file)

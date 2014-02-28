@@ -172,7 +172,7 @@ class DefaultHandlers(object):
             return RedirectViewer("news")
 
 
-class RequestDispatcher:
+class RequestDispatcher(object):
     """
     Gets request, check auth for user and calls appropriative handler for this request
     To determine handler uses dispatchTable

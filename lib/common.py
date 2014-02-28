@@ -99,7 +99,7 @@ class FuncRunner(object):
             logging.error("FuncRunner: object '%s' can't be executed", fn)
 
 
-class SmartDecoder:
+class SmartDecoder(object):
     enc_list = ["utf-8", "cp1251"]
 
     @classmethod

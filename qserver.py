@@ -26,7 +26,7 @@ def prepareLogger(logDir):
     logger.addHandler(handler)
 
 
-class FCGIServer:
+class FCGIServer(object):
     configFile = "questserver.cfg"
 
     def __init__(self):
