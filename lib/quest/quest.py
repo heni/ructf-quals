@@ -60,13 +60,17 @@ class QuestDescriptor(Unpickable(questID=str,
             print >> buffer, "timeout: %s" % int(self.waitingTime - time.time())
         return buffer.getvalue()
 
-    def replace_patterns(self, text, questId, user):
+    @staticmethod
+    def raw_replace_patterns(text, questId, teamId, salt=None):
         ### TODO salt to config
-        salt = "RuCTF-quALs_2013-SaLt!"
-        teamId = str(user.profile.GetProperty('teamID').GetValue())
+        salt = salt if salt else "RuCTF-quALs_2013-SaLt!"
         text = text.replace("%TEAM%", teamId)
         text = text.replace("%HASH%", hashlib.md5(questId + teamId + salt).hexdigest())
         return text
+
+    def replace_patterns(self, text, questId, user, salt=None):
+        teamId = str(user.profile.GetProperty('teamID').GetValue())
+        return self._replace_patterns(text, questId, teamId, salt)
 
     def GetXMLNode(self, lang, questId, user):
         view = None
