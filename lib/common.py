@@ -2,7 +2,7 @@ from __future__ import with_statement
 import threading, time, logging, os, hashlib, re
 import types
 
-from . import six
+import six
 
 def default(o=None):
     return o

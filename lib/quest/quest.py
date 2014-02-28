@@ -5,7 +5,8 @@ import os
 import time
 import copy
 import hashlib
-from ..six.moves import cStringIO
+import six
+from six.moves import cStringIO
 
 factory = minidom.Document()
 
