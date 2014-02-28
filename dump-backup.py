@@ -2,13 +2,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
 import sys,os, random, logging, re, time, codecs
-from ConfigParser import ConfigParser
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
+import six
+from six.moves.configparser import ConfigParser
 
-from users import *
-from questserver import QuestServer
-from dispatcher import SmartDecoder
+#sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
+
+from lib.users import *
+from lib.questserver import QuestServer
+from lib.dispatcher import SmartDecoder
 
 def DumpBackup():
     configurator = ConfigParser()

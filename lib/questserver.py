@@ -12,20 +12,22 @@ import time
 import bisect
 import pickle as _pickle
 
-from .common import *
-from .errors import *
-from .quest import *
-from .users import *
-from .viewers import *
+from lib.common import *
+from lib.errors import *
+from lib.quest import *
+from lib.users import *
+from lib.viewers import *
+
+import six
 
 
 class QuestSolution(Unpickable(timeStamp=float,
                                username=str,
-                               actionString=unicode,
+                               actionString=six.text_type,
                                callObject=default,
                                solutionID=str,
                                status=default,
-                               verdict=unicode)):
+                               verdict=six.text_type)):
     def __init__(self, username, actionString, verdictStatus, verdictMessage, ref=None):
         super(QuestSolution, self).__init__()
         self.timeStamp = time.time()
@@ -76,7 +78,7 @@ class QuestActions(Unpickable(descriptor=default,
 
 class NewsItem(Unpickable(timeStamp=float,
                           authorName=str,
-                          message=unicode)):
+                          message=six.text_type)):
     def __init__(self, author, text):
         super(NewsItem, self).__init__()
         self.timeStamp = time.time()
@@ -197,7 +199,7 @@ class QuestHolder(object):
     def SaveState(self, directory):
         saveId = re.sub(':', '-', self.GetId())
         saveDir = tempfile.mkdtemp(prefix="%s_" % saveId, dir=directory)
-        os.chmod(saveDir, 0777)
+        os.chmod(saveDir, 0o777)
         self.provider.SaveState(saveDir)
         with open(os.path.join(directory, saveId), 'w') as savefile:
             _pickle.dump(saveDir, savefile)
@@ -278,7 +280,7 @@ class TeamActionsTracker(object):
             sorted(self.qholder),
             key=lambda qId: self.qholder[qId].GetCategory()))
         self.availChecker = AvailQuestChecker(self, questserver.openAll)
-        print "TeamActionsTracker::__init__. %s" % questserver.quest
+        print("TeamActionsTracker::__init__. %s" % questserver.quest)
 
     def GetTeamScore(self, teamname):
         score = self.teamScores.get(teamname, None)
@@ -453,7 +455,7 @@ class QuestServer(object):
     def BackupPrepare(self):
         if not os.path.isdir(self.backupdir):
             os.makedirs(self.backupdir)
-            os.chmod(self.backupdir, 0777)
+            os.chmod(self.backupdir, 0o777)
         if os.listdir(self.backupdir):
             raise InitializationError("Please manually remove files from %s directory" % self.backupdir)
 
@@ -498,7 +500,7 @@ class QuestServer(object):
         directory = os.path.join(self.backupdir, "%s%06x" % (self.BACKUP_PREFIX, self.backupidx))
         self.backupidx += 1
         os.makedirs(directory)
-        os.chmod(directory, 0777)
+        os.chmod(directory, 0o777)
         self.SaveState(directory)
         backupList = self.GetBackupList()
         for d in backupList[self.backupcnt:]:

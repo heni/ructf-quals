@@ -2,12 +2,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
 import sys, random, optparse, logging, re,os
-from ConfigParser import ConfigParser
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
+import six
+from six.moves.configparser import ConfigParser
 
-from users import *
-from questserver import QuestServer
+#sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
+
+from lib.users import *
+from lib.questserver import QuestServer
 
 def parse_args():
     parser = optparse.OptionParser(description = "prepares new backup directory")

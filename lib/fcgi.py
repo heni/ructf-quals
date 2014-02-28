@@ -32,7 +32,7 @@
 
 
 import  os, sys, string, socket, errno
-from    cStringIO   import StringIO
+from six.moves import cStringIO
 import  cgi
 
 #---------------------------------------------------------------------------
@@ -249,7 +249,7 @@ class FCGI:
 
         # Check if the connection is from a legal address
         if good_addrs!=None and addr not in good_addrs:
-            raise error, 'Connection from invalid server!'
+            raise error('Connection from invalid server!')
 
         while remaining:
             r=record(); r.readRecord(self.conn)
@@ -367,8 +367,8 @@ def _startup():
         s=socket.fromfd(sys.stdin.fileno(), socket.AF_INET,
                         socket.SOCK_STREAM)
         s.getpeername()
-    except socket.error, (err, errmsg):
-        if err!=errno.ENOTCONN:       # must be a non-fastCGI environment
+    except socket.error as err:
+        if err[0] != errno.ENOTCONN:       # must be a non-fastCGI environment
             global _isFCGI
             _isFCGI = 0
             return

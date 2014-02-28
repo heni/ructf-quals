@@ -8,7 +8,9 @@ import shutil
 from shutil import Error, copy2, copystat
 from zipfile import ZipFile, ZIP_DEFLATED
 from contextlib import closing
-import ConfigParser
+
+import six
+from six.moves.configparser import ConfigParser
 
 
 SVN_DIR_NAME = '.svn' # Directory to be excluded till import

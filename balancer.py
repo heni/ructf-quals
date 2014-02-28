@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 from __future__ import with_statement
 from time import time as _time
-from Queue import deque as _deque
+from six.moves.queue import deque as _deque
 from threading import Condition
 
 class Heap:

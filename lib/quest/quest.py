@@ -21,9 +21,9 @@ class QuestDescriptor(Unpickable(questID=str,
                                  waitingTime=default)):
     @staticmethod
     def decode(text):
-        if not isinstance(text, unicode):
-            assert isinstance(text, str)
-            text = unicode(text, "utf-8")
+        if not isinstance(text, six.text_type):
+            assert isinstance(text, six.binary_type)
+            text = six.text_type(text, "utf-8")
         return text
 
     @classmethod
@@ -37,7 +37,7 @@ class QuestDescriptor(Unpickable(questID=str,
         self.questID = questID
         self.xmlNode = factory.createElement("quest")
         self.xmlNode.setAttribute("id", str(questID))
-        if isinstance(timeout, (str, unicode)):
+        if isinstance(timeout, (six.binary_type, six.text_type)):
             timeout = int(timeout.strip())
         if timeout:
             self.waitingTime = int(time.time() + timeout)

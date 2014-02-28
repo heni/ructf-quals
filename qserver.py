@@ -3,15 +3,18 @@
 from __future__ import with_statement
 import os, sys, threading, signal, time
 import logging, logging.handlers
-from ConfigParser import ConfigParser
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
+#sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
 
-import fcgi
-from dispatcher import RequestDispatcher, Request, ExitRequest
-from questserver import QuestServer
+import six
+from six.moves.configparser import ConfigParser
+
+
+import lib.fcgi
+from lib.dispatcher import RequestDispatcher, Request, ExitRequest
+from lib.questserver import QuestServer
 from balancer import LoadBalancer
-from viewers import IViewer
+from lib.viewers import IViewer
 
 
 def prepareLogger(logDir):
@@ -40,7 +43,7 @@ class FCGIServer(object):
         IViewer.BASE_URL = self.srv.baseUrl
 
         # Start threads
-        for _ in xrange(self.srv.workersCount):
+        for _ in six.range(self.srv.workersCount):
             threading.Thread(target=self.base_worker).start()
         threading.Thread(target=self.backup_worker).start()
 
@@ -87,7 +90,7 @@ class FCGIServer(object):
         self.srv.Backup()
         for _ in xrange(self.srv.workersCount):
             self.balancer.Add(ExitRequest())
-        print "exiting..."
+        print("exiting...")
 
 
 if __name__ == "__main__":
