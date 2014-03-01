@@ -104,15 +104,15 @@ class SmartDecoder(object):
 
     @classmethod
     def decode(cls, data=None):
-        if isinstance(data, unicode) or data is None:
+        if isinstance(data, six.text_type) or data is None:
             return data
         for enc in cls.enc_list:
             try:
-                _data = unicode(data, enc)
+                _data = six.text_type(data, enc)
                 return _data
             except:
                 pass
-        if not isinstance(data, unicode):
+        if not isinstance(data, six.text_type):
             logging.warning(" can't recognize user string %r", data)
         return data
 
