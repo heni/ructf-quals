@@ -93,7 +93,7 @@ class QuestDescriptor(Unpickable(questID=str,
         xmlNode = copy.deepcopy(self.xmlNode)
         if view:
             xmlNode.appendChild(view)
- 
+
         if self.file and (not os.access(self.file, os.R_OK) or not os.path.isfile(self.file)):
             logging.warning("Can't get access to file '%s', skipping...", self.file)
             self.file = None
@@ -109,27 +109,50 @@ class QuestDescriptor(Unpickable(questID=str,
 
     @classmethod
     def FromTextMessage(self, message):
-        quest = {'questID': None, 'text': None, 'html': None, 'file': None, 'timeout': None}
+
+        quest = {'questID': [], 'text': {'en': [], 'ru': []}, 'html': {'en': [], 'ru': []}, 'file': [],
+                 'timeout': []}
         cur = None
         for line in message.split("\n"):
             if line.startswith('ID:'):
-                cur = 'questID';
-                quest[cur] = line[3:]
+                cur = quest['questID']
+                cur.append(line[3:])
             elif line.startswith('text:'):
-                cur = 'text';
-                quest[cur] = line[5:]
+                cur = quest['text']['ru']
+                cur.append(line[5:])
+            elif line.startswith('text[en]:'):
+                cur = quest['text']['en']
+                cur.append(line[9:])
+            elif line.startswith('text[ru]:'):
+                cur = quest['text']['ru']
+                cur.append(line[9:])
             elif line.startswith('html:'):
-                cur = 'html';
-                quest[cur] = line[5:]
+                cur = quest['html']['ru']
+                cur.append(line[5:])
+            elif line.startswith('html[ru]:'):
+                cur = quest['html']['ru']
+                cur.append(line[9:])
+            elif line.startswith('html[en]:'):
+                cur = quest['html']['en']
+                cur.append(line[9:])
             elif line.startswith('file:'):
-                cur = 'file';
-                quest[cur] = line[5:]
+                cur = quest['file']
+                cur.append(line[5:])
             elif line.startswith('timeout:'):
-                cur = 'timeout';
-                quest[cur] = line[8:]
+                cur = quest['timeout']
+                cur.append(line[8:])
             elif cur:
-                quest[cur] += line
-        for q, v in quest.iteritems():
-            if v is not None:
-                quest[q] = v.strip()
+                cur.append(line)
+        recursevly_concat(quest)
         return QuestDescriptor(**quest)
+
+
+def recursevly_concat(dkt):
+    for q, v in six.iteritems(dkt):
+        if v:
+            if type(v) is dict:
+                recursevly_concat(v)
+            elif type(v) is list:
+                dkt[q] = ''.join(v).strip()
+        else:
+            dkt[q] = None
