@@ -109,36 +109,38 @@ class QuestDescriptor(Unpickable(questID=str,
 
     @classmethod
     def FromTextMessage(self, message):
+        if hasattr(message, 'decode'):
+            message = message.decode("utf-8")
 
         quest = {'questID': [], 'text': {'en': [], 'ru': []}, 'html': {'en': [], 'ru': []}, 'file': [],
                  'timeout': []}
         cur = None
         for line in message.split("\n"):
-            if line.startswith('ID:'):
+            if line.lower().startswith('id:'):
                 cur = quest['questID']
                 cur.append(line[3:])
-            elif line.startswith('text:'):
+            elif line.lower().startswith('text:'):
                 cur = quest['text']['ru']
                 cur.append(line[5:])
-            elif line.startswith('text[en]:'):
+            elif line.lower().startswith('text[en]:'):
                 cur = quest['text']['en']
                 cur.append(line[9:])
-            elif line.startswith('text[ru]:'):
+            elif line.lower().startswith('text[ru]:'):
                 cur = quest['text']['ru']
                 cur.append(line[9:])
-            elif line.startswith('html:'):
+            elif line.lower().startswith('html:'):
                 cur = quest['html']['ru']
                 cur.append(line[5:])
-            elif line.startswith('html[ru]:'):
+            elif line.lower().startswith('html[ru]:'):
                 cur = quest['html']['ru']
                 cur.append(line[9:])
-            elif line.startswith('html[en]:'):
+            elif line.lower().startswith('html[en]:'):
                 cur = quest['html']['en']
                 cur.append(line[9:])
-            elif line.startswith('file:'):
+            elif line.lower().startswith('file:'):
                 cur = quest['file']
                 cur.append(line[5:])
-            elif line.startswith('timeout:'):
+            elif line.lower().startswith('timeout:'):
                 cur = quest['timeout']
                 cur.append(line[8:])
             elif cur:
