@@ -23,6 +23,8 @@ class ScriptQuestProvider(object):
 
     def getProgOutput(self, *args):
         logging.info("Executing external application: %s %s (with workdir: %s)", self.progname, args, os.getcwd())
+        if not os.path.exists(self.dir):
+            os.mkdir(self.dir)
         executor = Popen((self.progname,) + args, stdout = PIPE, stderr = PIPE, stdin = PIPE, executable = self.executable)
         out, err = executor.communicate("")
         progline = "%s %s" % (self.progname, " ".join(args))
